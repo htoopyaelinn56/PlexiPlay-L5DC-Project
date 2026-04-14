@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/post_card.dart';
 import 'upload_page.dart';
+import 'profile_page.dart';
 
 class FeedPage extends StatelessWidget {
   const FeedPage({super.key});
@@ -41,6 +42,24 @@ class FeedPage extends StatelessWidget {
             ),
           ],
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: IconButton(
+              icon: const Icon(Icons.person_rounded, color: NeoTheme.black),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfilePage(
+                      username: 'Me (Demo User)',
+                    ),
+                  ),
+                );
+              },
+            ),
+          )
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(3),
           child: Container(color: NeoTheme.black, height: 3),

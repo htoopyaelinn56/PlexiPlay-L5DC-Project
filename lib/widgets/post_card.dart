@@ -7,12 +7,18 @@ class PostCard extends StatefulWidget {
   final String videoUrl;
   final String username;
   final String description;
+  final bool isProfileView;
+  final VoidCallback? onDelete;
+  final VoidCallback? onHide;
 
   const PostCard({
     super.key,
     required this.videoUrl,
     required this.username,
     required this.description,
+    this.isProfileView = false,
+    this.onDelete,
+    this.onHide,
   });
 
   @override
@@ -90,18 +96,53 @@ class _PostCardState extends State<PostCard> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  widget.username,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 16,
+                Expanded(
+                  child: Text(
+                    widget.username,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
-              ],
+                if (widget.isProfileView)
+                    PopupMenuButton<String>(
+                      icon: const Icon(
+                        Icons.more_vert_rounded,
+                        color: NeoTheme.black,
+                      ),
+                      onSelected: (value) {
+                        if (value == 'hide') {
+                          widget.onHide?.call();
+                        } else if (value == 'delete') {
+                          widget.onDelete?.call();
+                        }
+                      },
+                      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                        const PopupMenuItem<String>(
+                          value: 'hide',
+                          child: Text(
+                            'Hide Post',
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: 'delete',
+                          child: Text(
+                            'Delete Post',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: Colors.red,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
             ),
-          ),
 
-          // Video Player Area
+            // Video Player Area
           GestureDetector(
             onTap: _openVideo,
             child: Container(
