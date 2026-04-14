@@ -49,9 +49,10 @@ class FeedPage extends StatelessWidget {
         itemCount: 5, // Just to show a few dummy posts
         padding: const EdgeInsets.only(top: 16, bottom: 32),
         itemBuilder: (context, index) {
+          // Switch to an HLS streaming URL which plays instantly while downloading chunks
           return PostCard(
             videoUrl:
-                'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
+                'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8',
             username: 'User_${index + 1}',
             description:
                 'Check out this cool bee hovering around! Nature is always incredible. 🐝🌿 #Nature #NeoBrutalism',

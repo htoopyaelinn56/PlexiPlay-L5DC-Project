@@ -21,17 +21,23 @@ class VideoPlayerPage extends StatefulWidget {
 class _VideoPlayerPageState extends State<VideoPlayerPage> {
   late VideoPlayerController _controller;
   bool _isPlaying = false;
+  bool _isMuted = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
-      ..initialize().then((_) {
-        setState(() {}); // Update the UI once the video is initialized
-        _controller.setLooping(true);
-        _controller.play(); // Auto-play when opened
-        _isPlaying = true;
-      });
+    _controller =
+        VideoPlayerController.networkUrl(
+            Uri.parse(widget.videoUrl),
+            videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+          )
+          ..initialize().then((_) {
+            setState(() {}); // Update the UI once the video is initialized
+            _controller.setLooping(true);
+            _controller.setVolume(_isMuted ? 0.0 : 1.0);
+            _controller.play(); // Auto-play when opened
+            _isPlaying = true;
+          });
   }
 
   @override
@@ -52,20 +58,35 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     });
   }
 
+  void _toggleMute() {
+    setState(() {
+      _isMuted = !_isMuted;
+      _controller.setVolume(_isMuted ? 0.0 : 1.0);
+    });
+  }
+
+  String _formatDuration(Duration duration) {
+    final minutes = duration.inMinutes.toString().padLeft(2, '0');
+    final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
+    if (duration.inHours > 0) {
+      final hours = duration.inHours.toString().padLeft(2, '0');
+      return '$hours:$minutes:$seconds';
+    }
+    return '$minutes:$seconds';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: NeoTheme.black,
       body: SafeArea(
         child: Stack(
           children: [
             // Video Player Area
             GestureDetector(
               onTap: _togglePlay,
-              child: Container(
+              child: SizedBox(
                 width: double.infinity,
                 height: double.infinity,
-                color: NeoTheme.black,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -132,9 +153,92 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 ),
               ),
             ),
+
+            // Video Controls Overlay
+            if (_controller.value.isInitialized)
+              Positioned(
+                bottom: 32,
+                left: 16,
+                right: 16,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: NeoTheme.white,
+                    border: Border.all(
+                      color: NeoTheme.black,
+                      width: NeoTheme.borderThick,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: NeoTheme.black,
+                        offset: Offset(4, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      // Play/Pause button
+                      GestureDetector(
+                        onTap: _togglePlay,
+                        child: Icon(
+                          _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                          color: NeoTheme.black,
+                          size: 32,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      
+                      // Seek Bar
+                      Expanded(
+                        child: VideoProgressIndicator(
+                          _controller,
+                          allowScrubbing: true,
+                          colors: const VideoProgressColors(
+                            playedColor: NeoTheme.pink,
+                            bufferedColor: Colors.black26,
+                            backgroundColor: Colors.black12,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+
+                      // Timestamp
+                      ValueListenableBuilder<VideoPlayerValue>(
+                        valueListenable: _controller,
+                        builder: (context, value, child) {
+                          final position = _formatDuration(value.position);
+                          final duration = _formatDuration(value.duration);
+                          return Text(
+                            '$position / $duration',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                              color: NeoTheme.black,
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 12),
+                      
+                      // Audio Mute/Unmute toggle
+                      GestureDetector(
+                        onTap: _toggleMute,
+                        child: Icon(
+                          _isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                          color: NeoTheme.black,
+                          size: 28,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
 }
+
