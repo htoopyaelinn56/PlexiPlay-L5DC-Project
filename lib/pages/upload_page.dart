@@ -16,6 +16,7 @@ class UploadPage extends StatefulWidget {
 class _UploadPageState extends State<UploadPage> {
   final _descriptionController = TextEditingController();
   File? _selectedVideo;
+  File? _selectedThumbnail;
   bool _isCompressing = false;
 
   @override
@@ -31,6 +32,17 @@ class _UploadPageState extends State<UploadPage> {
     if (video != null) {
       setState(() {
         _selectedVideo = File(video.path);
+      });
+    }
+  }
+
+  Future<void> _pickThumbnail() async {
+    final picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() {
+        _selectedThumbnail = File(image.path);
       });
     }
   }
@@ -105,49 +117,112 @@ class _UploadPageState extends State<UploadPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              GestureDetector(
-                onTap: _isCompressing ? null : _pickVideo,
-                child: Container(
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: _selectedVideo != null
-                        ? NeoTheme.blue
-                        : NeoTheme.white,
-                    border: Border.all(
-                      color: NeoTheme.black,
-                      width: NeoTheme.borderThick,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: const [
-                      BoxShadow(color: NeoTheme.black, offset: Offset(4, 4)),
-                    ],
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          _selectedVideo != null
-                              ? Icons.video_file_rounded
-                              : Icons.upload_file_rounded,
-                          size: 48,
-                          color: NeoTheme.black,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          _selectedVideo != null
-                              ? 'Video Selected'
-                              : 'TAP TO PICK A VIDEO',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _isCompressing ? null : _pickVideo,
+                      child: Container(
+                        height: 140,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: _selectedVideo != null
+                              ? NeoTheme.blue
+                              : NeoTheme.white,
+                          border: Border.all(
                             color: NeoTheme.black,
+                            width: NeoTheme.borderThick,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: NeoTheme.black,
+                              offset: Offset(4, 4),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                _selectedVideo != null
+                                    ? Icons.video_file_rounded
+                                    : Icons.video_call_rounded,
+                                size: 40,
+                                color: NeoTheme.black,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                _selectedVideo != null
+                                    ? 'Video Ready'
+                                    : 'PICK VIDEO',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: NeoTheme.black,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _isCompressing ? null : _pickThumbnail,
+                      child: Container(
+                        height: 140,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: _selectedThumbnail != null
+                              ? NeoTheme.yellow
+                              : NeoTheme.white,
+                          border: Border.all(
+                            color: NeoTheme.black,
+                            width: NeoTheme.borderThick,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: NeoTheme.black,
+                              offset: Offset(4, 4),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                _selectedThumbnail != null
+                                    ? Icons.image_rounded
+                                    : Icons.add_photo_alternate_rounded,
+                                size: 40,
+                                color: NeoTheme.black,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                _selectedThumbnail != null
+                                    ? 'Thumb Ready'
+                                    : 'PICK THUMBNAIL',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: NeoTheme.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 32),
 
