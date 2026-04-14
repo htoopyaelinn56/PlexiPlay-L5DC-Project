@@ -75,6 +75,124 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     return '$minutes:$seconds';
   }
 
+  void _showNotesListDialog() {
+    _controller.pause();
+    setState(() => _isPlaying = false);
+
+    // Dummy notes to show
+    final List<Map<String, String>> dummyNotes = [
+      {'time': '00:05', 'text': 'Whoa, look at that lighting!'},
+      {'time': '00:12', 'text': 'Need to remember this transition effect.'},
+      {'time': '00:20', 'text': 'The music drops right here, perfectly timed.'},
+    ];
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Container(
+            constraints: const BoxConstraints(maxHeight: 400),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: NeoTheme.green,
+              border: Border.all(
+                color: NeoTheme.black,
+                width: NeoTheme.borderThick,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: const [
+                BoxShadow(color: NeoTheme.black, offset: Offset(6, 6)),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Saved Notes',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: NeoTheme.black,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: NeoTheme.black,
+                        size: 28,
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _controller.play();
+                        setState(() => _isPlaying = true);
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: dummyNotes.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final note = dummyNotes[index];
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          color: NeoTheme.white,
+                          border: Border.all(color: NeoTheme.black, width: 2),
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: NeoTheme.black,
+                              offset: Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '@ ${note['time']}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 14,
+                                color: NeoTheme.pink,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              note['text']!,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                color: NeoTheme.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _showNoteDialog() {
     final timestamp = _formatDuration(_controller.value.position);
     _controller.pause();
@@ -128,7 +246,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         _controller.play();
                         setState(() => _isPlaying = true);
                       },
-                    )
+                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -176,7 +294,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                             behavior: SnackBarBehavior.floating,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
-                              side: const BorderSide(color: NeoTheme.black, width: 2),
+                              side: const BorderSide(
+                                color: NeoTheme.black,
+                                width: 2,
+                              ),
                             ),
                           ),
                         );
@@ -208,7 +329,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       ),
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ),
@@ -296,52 +417,102 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
               ),
             ),
 
-            // Add Note Button
+            // Add Note / View Notes Buttons
             if (_controller.value.isInitialized)
               Positioned(
                 bottom: 110,
                 right: 16,
-                child: GestureDetector(
-                  onTap: _showNoteDialog,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10,
-                      horizontal: 14,
-                    ),
-                    decoration: BoxDecoration(
-                      color: NeoTheme.yellow,
-                      border: Border.all(
-                        color: NeoTheme.black,
-                        width: NeoTheme.borderThick,
-                      ),
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: NeoTheme.black,
-                          offset: Offset(4, 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // View Notes Button
+                    GestureDetector(
+                      onTap: _showNotesListDialog,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 14,
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(
-                          Icons.edit_note_rounded,
-                          color: NeoTheme.black,
-                          size: 24,
-                        ),
-                        SizedBox(width: 6),
-                        Text(
-                          'Add Note',
-                          style: TextStyle(
+                        decoration: BoxDecoration(
+                          color: NeoTheme.green,
+                          border: Border.all(
                             color: NeoTheme.black,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 14,
+                            width: NeoTheme.borderThick,
                           ),
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: NeoTheme.black,
+                              offset: Offset(4, 4),
+                            ),
+                          ],
                         ),
-                      ],
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(
+                              Icons.list_alt_rounded,
+                              color: NeoTheme.black,
+                              size: 24,
+                            ),
+                            SizedBox(width: 6),
+                            Text(
+                              'Notes',
+                              style: TextStyle(
+                                color: NeoTheme.black,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    // Add Note Button
+                    GestureDetector(
+                      onTap: _showNoteDialog,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: NeoTheme.yellow,
+                          border: Border.all(
+                            color: NeoTheme.black,
+                            width: NeoTheme.borderThick,
+                          ),
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: NeoTheme.black,
+                              offset: Offset(4, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(
+                              Icons.edit_note_rounded,
+                              color: NeoTheme.black,
+                              size: 24,
+                            ),
+                            SizedBox(width: 6),
+                            Text(
+                              'Add Note',
+                              style: TextStyle(
+                                color: NeoTheme.black,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
