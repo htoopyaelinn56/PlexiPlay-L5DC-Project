@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:video_compress/video_compress.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/neo_button.dart';
@@ -18,6 +19,17 @@ class _UploadPageState extends State<UploadPage> {
   File? _selectedVideo;
   File? _selectedThumbnail;
   bool _isCompressing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _requestMediaPermissions();
+  }
+
+  Future<void> _requestMediaPermissions() async {
+    // Request multiple permissions related to media
+    await [Permission.photos, Permission.videos, Permission.storage].request();
+  }
 
   @override
   void dispose() {
@@ -120,7 +132,8 @@ class _UploadPageState extends State<UploadPage> {
               Row(
                 children: [
                   Expanded(
-                    child: GestureDetector(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
                       onTap: _isCompressing ? null : _pickVideo,
                       child: Container(
                         height: 140,
@@ -172,7 +185,8 @@ class _UploadPageState extends State<UploadPage> {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: GestureDetector(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
                       onTap: _isCompressing ? null : _pickThumbnail,
                       child: Container(
                         height: 140,
