@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/post_card.dart';
+import 'upload_page.dart';
 
 class FeedPage extends StatelessWidget {
   const FeedPage({super.key});
@@ -45,19 +46,48 @@ class FeedPage extends StatelessWidget {
           child: Container(color: NeoTheme.black, height: 3),
         ),
       ),
-      body: ListView.builder(
-        itemCount: 5, // Just to show a few dummy posts
-        padding: const EdgeInsets.only(top: 16, bottom: 32),
-        itemBuilder: (context, index) {
-          // Switch to an HLS streaming URL which plays instantly while downloading chunks
-          return PostCard(
-            videoUrl:
-                'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8',
-            username: 'User_${index + 1}',
-            description:
-                'Check out this cool bee hovering around! Nature is always incredible. 🐝🌿 #Nature #NeoBrutalism',
+      body: CustomScrollView(
+        slivers: [
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => PostCard(
+                videoUrl:
+                    'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8',
+                username: 'User_${index + 1}',
+                description:
+                    'Check out this cool bee hovering around! Nature is always incredible. 🐝🌿 #Nature #NeoBrutalism',
+              ),
+              childCount: 5,
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(height: 120), // Extra space at the bottom
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const UploadPage()),
           );
         },
+        backgroundColor: NeoTheme.yellow,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(
+            color: NeoTheme.black,
+            width: NeoTheme.borderThick,
+          ),
+        ),
+        elevation: 0,
+        highlightElevation: 0,
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
+          child: const Icon(Icons.add_rounded, color: NeoTheme.black, size: 32),
+        ),
       ),
     );
   }
