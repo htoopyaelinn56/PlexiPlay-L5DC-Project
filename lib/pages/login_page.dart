@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/neo_button.dart';
 import '../widgets/neo_text_field.dart';
+import 'feed_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -27,6 +28,11 @@ class _LoginPageState extends State<LoginPage> {
     // TODO: Supabase unified Auth logic here (login or sign up based on account existence)
     print(
       'Authenticating email: $email, with length of pwd: ${password.length}',
+    );
+
+    // Bypass to feed directly for testing!
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => const FeedPage()),
     );
   }
 
