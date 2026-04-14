@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/neo_theme.dart';
 import '../pages/video_player_page.dart';
+import '../pages/comments_page.dart';
 
 class PostCard extends StatefulWidget {
   final String videoUrl;
@@ -40,8 +41,12 @@ class _PostCardState extends State<PostCard> {
   }
 
   void _openComments() {
-    // Action for opening the comment section
-    print('Open comments for post by ${widget.username}');
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) =>
+            CommentsPage(originalPostUsername: widget.username),
+      ),
+    );
   }
 
   @override
