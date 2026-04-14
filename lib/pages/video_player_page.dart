@@ -161,7 +161,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 left: 16,
                 right: 16,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: NeoTheme.white,
                     border: Border.all(
@@ -170,10 +173,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     ),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: const [
-                      BoxShadow(
-                        color: NeoTheme.black,
-                        offset: Offset(4, 4),
-                      ),
+                      BoxShadow(color: NeoTheme.black, offset: Offset(4, 4)),
                     ],
                   ),
                   child: Row(
@@ -182,13 +182,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       GestureDetector(
                         onTap: _togglePlay,
                         child: Icon(
-                          _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                          _isPlaying
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
                           color: NeoTheme.black,
                           size: 32,
                         ),
                       ),
                       const SizedBox(width: 12),
-                      
+
                       // Seek Bar
                       Expanded(
                         child: VideoProgressIndicator(
@@ -221,12 +223,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         },
                       ),
                       const SizedBox(width: 12),
-                      
+
                       // Audio Mute/Unmute toggle
                       GestureDetector(
                         onTap: _toggleMute,
                         child: Icon(
-                          _isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                          _isMuted
+                              ? Icons.volume_off_rounded
+                              : Icons.volume_up_rounded,
                           color: NeoTheme.black,
                           size: 28,
                         ),
@@ -241,4 +245,3 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     );
   }
 }
-
