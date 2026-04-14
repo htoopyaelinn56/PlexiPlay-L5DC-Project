@@ -74,10 +74,7 @@ class _ProfilePageState extends State<ProfilePage> {
         elevation: 0,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4),
-          child: Container(
-            color: NeoTheme.black,
-            height: NeoTheme.borderThick,
-          ),
+          child: Container(color: NeoTheme.black, height: NeoTheme.borderThick),
         ),
         actions: [
           IconButton(

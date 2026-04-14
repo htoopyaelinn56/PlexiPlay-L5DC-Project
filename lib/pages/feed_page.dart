@@ -51,14 +51,13 @@ class FeedPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const ProfilePage(
-                      username: 'Me (Demo User)',
-                    ),
+                    builder: (context) =>
+                        const ProfilePage(username: 'Me (Demo User)'),
                   ),
                 );
               },
             ),
-          )
+          ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(3),
