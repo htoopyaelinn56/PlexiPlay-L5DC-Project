@@ -75,6 +75,148 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     return '$minutes:$seconds';
   }
 
+  void _showNoteDialog() {
+    final timestamp = _formatDuration(_controller.value.position);
+    _controller.pause();
+    setState(() => _isPlaying = false);
+
+    final noteController = TextEditingController();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: NeoTheme.blue,
+              border: Border.all(
+                color: NeoTheme.black,
+                width: NeoTheme.borderThick,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: const [
+                BoxShadow(color: NeoTheme.black, offset: Offset(6, 6)),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Note at $timestamp',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: NeoTheme.black,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: NeoTheme.black,
+                        size: 28,
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _controller.play();
+                        setState(() => _isPlaying = true);
+                      },
+                    )
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: NeoTheme.white,
+                    border: Border.all(color: NeoTheme.black, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: const [
+                      BoxShadow(color: NeoTheme.black, offset: Offset(2, 2)),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: noteController,
+                    maxLines: 3,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    decoration: const InputDecoration(
+                      hintText: 'Type your awesome thoughts...',
+                      hintStyle: TextStyle(fontWeight: FontWeight.w500),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.all(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        // TODO: Save to Supabase
+                        Navigator.pop(context);
+                        _controller.play();
+                        setState(() => _isPlaying = true);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Note saved at $timestamp!',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: NeoTheme.black,
+                              ),
+                            ),
+                            backgroundColor: NeoTheme.green,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              side: const BorderSide(color: NeoTheme.black, width: 2),
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: NeoTheme.yellow,
+                          border: Border.all(color: NeoTheme.black, width: 2),
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: NeoTheme.black,
+                              offset: Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Text(
+                          'Save Note',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: NeoTheme.black,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -153,6 +295,55 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 ),
               ),
             ),
+
+            // Add Note Button
+            if (_controller.value.isInitialized)
+              Positioned(
+                bottom: 110,
+                right: 16,
+                child: GestureDetector(
+                  onTap: _showNoteDialog,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: NeoTheme.yellow,
+                      border: Border.all(
+                        color: NeoTheme.black,
+                        width: NeoTheme.borderThick,
+                      ),
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: NeoTheme.black,
+                          offset: Offset(4, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(
+                          Icons.edit_note_rounded,
+                          color: NeoTheme.black,
+                          size: 24,
+                        ),
+                        SizedBox(width: 6),
+                        Text(
+                          'Add Note',
+                          style: TextStyle(
+                            color: NeoTheme.black,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
 
             // Video Controls Overlay
             if (_controller.value.isInitialized)
