@@ -148,10 +148,10 @@ class _PostCardState extends State<PostCard> {
             onTap: _openVideo,
             child: Container(
               width: double.infinity,
-              height: 300,
+              height: 180,
               decoration: BoxDecoration(
-                color: NeoTheme.black.withOpacity(
-                  0.1,
+                color: NeoTheme.black.withAlpha(
+                  26,
                 ), // Background color for video area
                 border: const Border.symmetric(
                   horizontal: BorderSide(
