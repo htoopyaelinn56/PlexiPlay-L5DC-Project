@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:open_file/open_file.dart';
 import '../theme/neo_theme.dart';
 import '../pages/video_player_page.dart';
 import '../pages/comments_page.dart';
@@ -53,6 +58,64 @@ class _PostCardState extends State<PostCard> {
             CommentsPage(originalPostUsername: widget.username),
       ),
     );
+  }
+
+  Future<void> _downloadVideo() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Starting Download...'),
+        backgroundColor: NeoTheme.green,
+      ),
+    );
+
+    // Request storage permissions
+    if (Platform.isAndroid) {
+      await Permission.manageExternalStorage.request();
+    }
+
+    try {
+      final Directory? downloadsDir = Platform.isAndroid
+          ? await getExternalStorageDirectory()
+          : await getApplicationDocumentsDirectory();
+
+      if (downloadsDir != null) {
+        final savedDir = downloadsDir.path;
+        final fileName = widget.videoUrl.split('/').last.split('?').first;
+        final path = '$savedDir/$fileName';
+
+        final fileExists = await File(path).exists();
+        if (fileExists) {
+          await OpenFile.open(path);
+        } else {
+          await FlutterDownloader.enqueue(
+            url: widget.videoUrl,
+            savedDir: savedDir,
+            fileName: fileName,
+            saveInPublicStorage: true,
+            showNotification: true,
+            openFileFromNotification: true,
+          );
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Download queued!'),
+                backgroundColor: NeoTheme.blue,
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Download failed: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -118,6 +181,7 @@ class _PostCardState extends State<PostCard> {
                         widget.onDelete?.call();
                       }
                     },
+                    color: Colors.white,
                     itemBuilder: (BuildContext context) =>
                         <PopupMenuEntry<String>>[
                           const PopupMenuItem<String>(
@@ -275,6 +339,46 @@ class _PostCardState extends State<PostCard> {
                             SizedBox(width: 6),
                             Text(
                               'COMMENT',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+
+                    // Download Button
+                    GestureDetector(
+                      onTap: _downloadVideo,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: NeoTheme.green,
+                          border: Border.all(
+                            color: NeoTheme.black,
+                            width: NeoTheme.borderThick,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: NeoTheme.black,
+                              offset: Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(
+                              Icons.download_rounded,
+                              color: NeoTheme.black,
+                              size: 24,
+                            ),
+                            SizedBox(width: 6),
+                            Text(
+                              'DOWNLOAD',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
