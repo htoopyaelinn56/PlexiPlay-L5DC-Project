@@ -16,12 +16,14 @@ class _ProfilePageState extends State<ProfilePage> {
   // Dummy profile posts
   final List<Map<String, String>> _myPosts = [
     {
-      'videoUrl': 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+      'videoUrl':
+          'https://wbeifzoolcvpmsmgnskm.supabase.co/storage/v1/object/public/videos/2026-04-14-16-13-22-622.mp4',
       'username': 'MyUsername',
       'description': 'This is my first test video on PlexiPlay! 🚀',
     },
     {
-      'videoUrl': 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+      'videoUrl':
+          'https://wbeifzoolcvpmsmgnskm.supabase.co/storage/v1/object/public/videos/2026-04-14-16-13-22-622.mp4',
       'username': 'MyUsername',
       'description': 'Exploring Neo-brutalism vibes with this awesome player.',
     },

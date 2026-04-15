@@ -70,7 +70,7 @@ class FeedPage extends StatelessWidget {
             delegate: SliverChildBuilderDelegate(
               (context, index) => PostCard(
                 videoUrl:
-                    'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8',
+                    'https://wbeifzoolcvpmsmgnskm.supabase.co/storage/v1/object/public/videos/2026-04-14-16-13-22-622.mp4',
                 username: 'User_${index + 1}',
                 description:
                     'Check out this cool bee hovering around! Nature is always incredible. 🐝🌿 #Nature #NeoBrutalism',
