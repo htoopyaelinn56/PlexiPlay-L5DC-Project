@@ -1,16 +1,18 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:open_file/open_file.dart';
+import 'package:plexi_play/local_db/downloaded_videos_repository.dart';
 import '../theme/neo_theme.dart';
 import '../pages/video_player_page.dart';
 import '../pages/comments_page.dart';
 
-class PostCard extends StatefulWidget {
+class PostCard extends ConsumerStatefulWidget {
   final String videoUrl;
   final String username;
   final String description;
@@ -29,10 +31,10 @@ class PostCard extends StatefulWidget {
   });
 
   @override
-  State<PostCard> createState() => _PostCardState();
+  ConsumerState<PostCard> createState() => _PostCardState();
 }
 
-class _PostCardState extends State<PostCard> {
+class _PostCardState extends ConsumerState<PostCard> {
   bool _isLiked = false;
 
   void _openVideo() {
@@ -85,10 +87,21 @@ class _PostCardState extends State<PostCard> {
         final fileName = widget.videoUrl.split('/').last.split('?').first;
         final path = '$savedDir/$fileName';
 
-        final fileExists = await File(path).exists();
-        log('File exists: $fileExists at path: $path');
-        if (fileExists) {
-          await OpenFile.open(path);
+        final downloadedVideoRepository = ref.read(
+          downloadedVideosRepositoryProvider,
+        );
+
+        final file = await downloadedVideoRepository.getVideoByPath(path);
+
+        if (file != null) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Video already downloaded!'),
+                backgroundColor: Colors.blueAccent,
+              ),
+            );
+          }
         } else {
           await FlutterDownloader.enqueue(
             url: widget.videoUrl,
@@ -98,13 +111,21 @@ class _PostCardState extends State<PostCard> {
             showNotification: true,
             openFileFromNotification: true,
           );
+          await downloadedVideoRepository.saveOfflineVideos(
+            filePath: path,
+            title: widget.description,
+            thumbnailUrl: '',
+            videoUrl: widget.videoUrl,
+            author: widget.username,
+          );
         }
       }
-    } catch (e) {
+    } catch (e, st) {
+      log('Download error: $e', stackTrace: st);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Download failed: $e'),
+            content: Text('Download failed'),
             backgroundColor: Colors.redAccent,
           ),
         );

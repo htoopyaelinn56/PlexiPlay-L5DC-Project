@@ -15,15 +15,15 @@ class DownloadedVideosRepository {
     required String videoUrl,
     required String author,
   }) async {
-    final newVideo = DownloadedVideos(
-      id: isar.downloadedVideos.autoIncrement(),
-      filePath: filePath,
-      title: title,
-      thumbnailUrl: thumbnailUrl,
-      videoUrl: videoUrl,
-      author: author,
-    );
-    await isar.writeAsync((isar) async {
+    await isar.writeAsync((isar) {
+      final newVideo = DownloadedVideos(
+        id: isar.downloadedVideos.autoIncrement(),
+        filePath: filePath,
+        title: title,
+        thumbnailUrl: thumbnailUrl,
+        videoUrl: videoUrl,
+        author: author,
+      );
       isar.downloadedVideos.put(newVideo);
     });
   }
@@ -33,6 +33,14 @@ class DownloadedVideosRepository {
       fireImmediately: true,
     );
     yield* videosStream;
+  }
+
+  Future<DownloadedVideos?> getVideoByPath(String filePath) async {
+    final result = await isar.downloadedVideos
+        .where()
+        .filePathEqualTo(filePath)
+        .findFirstAsync();
+    return result;
   }
 }
 
