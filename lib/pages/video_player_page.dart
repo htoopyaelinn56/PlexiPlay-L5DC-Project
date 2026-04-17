@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import '../theme/neo_theme.dart';
@@ -7,12 +9,14 @@ class VideoPlayerPage extends StatefulWidget {
   final String videoUrl;
   final String username;
   final String description;
+  final bool isLocalFile;
 
   const VideoPlayerPage({
     super.key,
     required this.videoUrl,
     required this.username,
     required this.description,
+    this.isLocalFile = false,
   });
 
   @override
@@ -28,10 +32,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   void initState() {
     super.initState();
     _controller =
-        VideoPlayerController.networkUrl(
-            Uri.parse(widget.videoUrl),
-            videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
-          )
+        widget.isLocalFile
+              ? VideoPlayerController.file(
+                  File(widget.videoUrl),
+                  videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+                )
+              : VideoPlayerController.networkUrl(
+                  Uri.parse(widget.videoUrl),
+                  videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+                )
           ..initialize().then((_) {
             setState(() {}); // Update the UI once the video is initialized
             _controller.setLooping(true);

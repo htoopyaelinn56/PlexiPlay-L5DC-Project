@@ -96,7 +96,7 @@ class _PostCardState extends ConsumerState<PostCard> {
         if (file != null) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+              const SnackBar(
                 content: Text('Video already downloaded!'),
                 backgroundColor: Colors.blueAccent,
               ),
@@ -107,7 +107,7 @@ class _PostCardState extends ConsumerState<PostCard> {
             url: widget.videoUrl,
             savedDir: savedDir,
             fileName: fileName,
-            saveInPublicStorage: true,
+            saveInPublicStorage: false,
             showNotification: true,
             openFileFromNotification: true,
           );
