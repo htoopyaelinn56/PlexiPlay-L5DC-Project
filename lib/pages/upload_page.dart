@@ -6,6 +6,7 @@ import 'package:video_compress/video_compress.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/neo_button.dart';
 import '../widgets/neo_text_field.dart';
+import '../widgets/neo_back_button.dart';
 
 class UploadPage extends StatefulWidget {
   const UploadPage({super.key});
@@ -108,6 +109,10 @@ class _UploadPageState extends State<UploadPage> {
     return Scaffold(
       backgroundColor: NeoTheme.cream,
       appBar: AppBar(
+        leading: Row(
+          children: [const SizedBox(width: 20), const NeoBackButton()],
+        ),
+        leadingWidth: 64,
         backgroundColor: NeoTheme.white,
         centerTitle: false,
         title: const Text(

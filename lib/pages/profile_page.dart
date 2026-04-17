@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/post_card.dart';
+import '../widgets/neo_back_button.dart';
 import 'login_page.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -65,6 +66,10 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: NeoTheme.white,
       appBar: AppBar(
+        leading: Row(
+          children: [const SizedBox(width: 20), const NeoBackButton()],
+        ),
+        leadingWidth: 64,
         title: Text(
           widget.username,
           style: const TextStyle(

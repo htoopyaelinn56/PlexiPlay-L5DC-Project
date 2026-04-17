@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import '../theme/neo_theme.dart';
+import '../widgets/neo_back_button.dart';
 
 class VideoPlayerPage extends StatefulWidget {
   final String videoUrl;
@@ -391,31 +392,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             ),
 
             // Floating Back Button
-            Positioned(
-              top: 16,
-              left: 16,
-              child: GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: NeoTheme.white,
-                    border: Border.all(
-                      color: NeoTheme.black,
-                      width: NeoTheme.borderThick,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: const [
-                      BoxShadow(color: NeoTheme.black, offset: Offset(2, 2)),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.arrow_back_rounded,
-                    color: NeoTheme.black,
-                  ),
-                ),
-              ),
-            ),
+            const Positioned(top: 16, left: 16, child: NeoBackButton()),
 
             // Add Note / View Notes Buttons
             if (_controller.value.isInitialized)
