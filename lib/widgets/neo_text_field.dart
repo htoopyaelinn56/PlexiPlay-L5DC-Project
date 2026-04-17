@@ -31,6 +31,14 @@ class _NeoTextFieldState extends State<NeoTextField> {
   }
 
   @override
+  void didUpdateWidget(NeoTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.obscureText != widget.obscureText) {
+      _isObscured = widget.obscureText;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,13 +53,12 @@ class _NeoTextFieldState extends State<NeoTextField> {
             color: NeoTheme.white,
             borderRadius: NeoTheme.radiusMain,
           ),
-          child: TextFormField(
+          child: TextField(
             onTapOutside: (_) {
               FocusScope.of(context).unfocus();
             },
             controller: widget.controller,
             obscureText: _isObscured,
-            validator: widget.validator,
             style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
             decoration: InputDecoration(
               hintText: widget.hintText,
