@@ -46,6 +46,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'PlexiPlay',
       theme: ThemeData(
         scaffoldBackgroundColor: const Color(0xFFFFF6E9),
