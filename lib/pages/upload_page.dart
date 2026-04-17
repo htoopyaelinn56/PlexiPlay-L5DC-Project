@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:video_compress/video_compress.dart';
@@ -163,12 +164,11 @@ class _UploadPageState extends State<UploadPage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                _selectedVideo != null
-                                    ? Icons.video_file_rounded
-                                    : Icons.video_call_rounded,
+                              HugeIcon(
+                                icon: HugeIcons.strokeRoundedVideo01,
                                 size: 40,
                                 color: NeoTheme.black,
+                                strokeWidth: 2,
                               ),
                               const SizedBox(height: 8),
                               Text(
@@ -216,12 +216,11 @@ class _UploadPageState extends State<UploadPage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                _selectedThumbnail != null
-                                    ? Icons.image_rounded
-                                    : Icons.add_photo_alternate_rounded,
+                              HugeIcon(
+                                icon: HugeIcons.strokeRoundedImage01,
                                 size: 40,
                                 color: NeoTheme.black,
+                                strokeWidth: 2,
                               ),
                               const SizedBox(height: 8),
                               Text(

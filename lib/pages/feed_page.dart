@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/post_card.dart';
 import 'upload_page.dart';
@@ -44,35 +45,40 @@ class FeedPage extends StatelessWidget {
           ],
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: IconButton(
-              icon: const Icon(Icons.download_rounded, color: NeoTheme.black),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const DownloadedVideosPage(),
-                  ),
-                );
-              },
+          IconButton(
+            icon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedBookDownload,
+              color: NeoTheme.black,
+              strokeWidth: 2,
             ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DownloadedVideosPage(),
+                ),
+              );
+            },
+            tooltip: 'Downloads',
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: IconButton(
-              icon: const Icon(Icons.person_rounded, color: NeoTheme.black),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        const ProfilePage(username: 'Me (Demo User)'),
-                  ),
-                );
-              },
+          IconButton(
+            icon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedUserAccount,
+              color: NeoTheme.black,
+              strokeWidth: 2,
             ),
+            tooltip: 'Profile',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      const ProfilePage(username: 'Me (Demo User)'),
+                ),
+              );
+            },
           ),
+          const SizedBox(width: 12),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(3),

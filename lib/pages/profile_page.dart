@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/post_card.dart';
 import '../widgets/neo_back_button.dart';
@@ -86,7 +87,11 @@ class _ProfilePageState extends State<ProfilePage> {
         actions: [
           IconButton(
             onPressed: _handleLogout,
-            icon: const Icon(Icons.logout_rounded, color: NeoTheme.black),
+            icon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedLogout01,
+              color: NeoTheme.black,
+              strokeWidth: 2,
+            ),
             tooltip: 'Logout',
           ),
           const SizedBox(width: 8),
