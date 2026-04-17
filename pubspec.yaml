@@ -13,6 +13,8 @@ dependencies:
   flutter_riverpod: ^3.3.1
   google_fonts: ^8.0.2
   image_picker: ^1.2.1
+  isar_plus: ^1.2.5
+  isar_plus_flutter_libs: ^1.2.5
   open_file: ^3.5.11
   path_provider: ^2.1.5
   permission_handler: ^12.0.1
@@ -23,6 +25,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  build_runner: ^2.13.1
 
 flutter:
   uses-material-design: true
