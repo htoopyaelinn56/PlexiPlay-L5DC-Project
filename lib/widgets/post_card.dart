@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -84,6 +86,7 @@ class _PostCardState extends State<PostCard> {
         final path = '$savedDir/$fileName';
 
         final fileExists = await File(path).exists();
+        log('File exists: $fileExists at path: $path');
         if (fileExists) {
           await OpenFile.open(path);
         } else {
@@ -95,15 +98,6 @@ class _PostCardState extends State<PostCard> {
             showNotification: true,
             openFileFromNotification: true,
           );
-
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Download queued!'),
-                backgroundColor: NeoTheme.blue,
-              ),
-            );
-          }
         }
       }
     } catch (e) {
@@ -375,14 +369,6 @@ class _PostCardState extends State<PostCard> {
                               Icons.download_rounded,
                               color: NeoTheme.black,
                               size: 24,
-                            ),
-                            SizedBox(width: 6),
-                            Text(
-                              'DOWNLOAD',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
                             ),
                           ],
                         ),
