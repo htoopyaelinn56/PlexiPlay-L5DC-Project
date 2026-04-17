@@ -6,6 +6,7 @@ class NeoTextField extends StatefulWidget {
   final String hintText;
   final bool obscureText;
   final TextEditingController? controller;
+  final String? Function(String?)? validator;
 
   const NeoTextField({
     super.key,
@@ -13,6 +14,7 @@ class NeoTextField extends StatefulWidget {
     this.hintText = '',
     this.obscureText = false,
     this.controller,
+    this.validator,
   });
 
   @override
@@ -43,12 +45,13 @@ class _NeoTextFieldState extends State<NeoTextField> {
             color: NeoTheme.white,
             borderRadius: NeoTheme.radiusMain,
           ),
-          child: TextField(
+          child: TextFormField(
             onTapOutside: (_) {
               FocusScope.of(context).unfocus();
             },
             controller: widget.controller,
             obscureText: _isObscured,
+            validator: widget.validator,
             style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
             decoration: InputDecoration(
               hintText: widget.hintText,

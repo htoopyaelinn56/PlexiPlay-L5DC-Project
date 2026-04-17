@@ -1,20 +1,22 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:plexi_play/supabase/auth_controller.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/neo_button.dart';
 import '../widgets/neo_text_field.dart';
 import 'feed_page.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _usernameController = TextEditingController();
@@ -28,9 +30,87 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  void _showErrorDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: NeoTheme.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(
+              color: NeoTheme.black,
+              width: NeoTheme.borderThick,
+            ),
+          ),
+          title: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.w900),
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(fontWeight: FontWeight.w500),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(foregroundColor: NeoTheme.black),
+              child: const Text(
+                'OK',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _handleAuth() {
-    final email = _emailController.text;
+    final email = _emailController.text.trim();
     final password = _passwordController.text;
+    final username = _usernameController.text.trim();
+
+    if (!_isLogin) {
+      if (username.isEmpty) {
+        _showErrorDialog(
+          'Missing Username',
+          'Please enter a username to sign up.',
+        );
+        return;
+      }
+      if (username.length < 3) {
+        _showErrorDialog(
+          'Invalid Username',
+          'Username must be at least 3 characters.',
+        );
+        return;
+      }
+    }
+
+    if (email.isEmpty) {
+      _showErrorDialog('Missing Email', 'Please enter your email address.');
+      return;
+    }
+
+    final RegExp emailRegex = RegExp(r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+');
+    if (!emailRegex.hasMatch(email)) {
+      _showErrorDialog('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+
+    if (password.isEmpty) {
+      _showErrorDialog('Missing Password', 'Please enter your password.');
+      return;
+    }
+    if (password.length < 6) {
+      _showErrorDialog(
+        'Invalid Password',
+        'Password must be at least 6 characters.',
+      );
+      return;
+    }
+
     // TODO: Supabase unified Auth logic here (login or sign up based on account existence)
     print(
       'Authenticating email: $email, with length of pwd: ${password.length}',
@@ -58,6 +138,21 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authControllerProvider);
+    ref.listen(authControllerProvider, (previous, next) {
+      if (next is AsyncError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.error.toString()),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else if (next is AsyncData) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const FeedPage()),
+        );
+      }
+    });
     return Scaffold(
       backgroundColor: NeoTheme.cream,
       body: SafeArea(

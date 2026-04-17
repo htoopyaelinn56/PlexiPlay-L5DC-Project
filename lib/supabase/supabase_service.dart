@@ -8,7 +8,15 @@ class SupabaseService {
     await supabaseClient.auth.signOut();
   }
 
-  Future<void> loginOrSignUp(String email, String password) async {}
+  Future<void> login({required String email, required String password}) async {}
+
+  Future<void> signUp({
+    required String email,
+    required String password,
+    required String username,
+  }) async {
+    throw AuthException('Sign up not implemented yet');
+  }
 }
 
 final supabaseServiceProvider = Provider((ref) => SupabaseService());
