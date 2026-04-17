@@ -1,22 +1,41 @@
+import 'dart:developer';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:plexi_play/exceptions/auth_exception.dart';
 import 'package:plexi_play/supabase/supabase_service.dart';
 
 class AuthController extends AsyncNotifier<void> {
   @override
   build() {}
 
-  void signUp({required String email, required String password}) async {
+  void signUpOrLogin({
+    required String email,
+    required String password,
+    required String username,
+    required bool isLogin,
+  }) async {
     state = const AsyncLoading();
     try {
       final supabaseService = ref.read(supabaseServiceProvider);
-      await supabaseService.signUp(
-        email: email,
-        password: password,
-        username: email,
-      );
+
+      if (isLogin) {
+        await supabaseService.login(email: email, password: password);
+      } else {
+        await supabaseService.signUp(
+          email: email,
+          password: password,
+          username: username,
+        );
+      }
+
       state = const AsyncData(null);
     } catch (e, st) {
-      state = AsyncError(e, st);
+      log('Error during sign up: $e, ${e.runtimeType}');
+      if (e is AuthException) {
+        state = AsyncError(e.message, st);
+      } else {
+        state = AsyncError('Something went wrong', st);
+      }
     }
   }
 }

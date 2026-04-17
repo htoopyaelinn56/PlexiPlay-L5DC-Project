@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:plexi_play/exceptions/auth_exception.dart';
+import 'package:plexi_play/exceptions/custom_exception.dart';
 import 'package:plexi_play/supabase/auth_controller.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/neo_button.dart';
@@ -111,15 +113,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       return;
     }
 
-    // TODO: Supabase unified Auth logic here (login or sign up based on account existence)
-    print(
-      'Authenticating email: $email, with length of pwd: ${password.length}',
-    );
-
-    // Bypass to feed directly for testing!
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const FeedPage()),
-    );
+    ref
+        .read(authControllerProvider.notifier)
+        .signUpOrLogin(
+          email: email,
+          password: password,
+          username: username,
+          isLogin: _isLogin,
+        );
   }
 
   @override
@@ -296,7 +297,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               child: NeoButton(
                                 text: _isLogin ? 'LOG IN' : 'SIGN UP',
                                 backgroundColor: NeoTheme.yellow,
-                                onPressed: _handleAuth,
+                                onPressed: authState.isLoading
+                                    ? null
+                                    : _handleAuth,
+                                isLoading: authState.isLoading,
                               ),
                             ),
                             const SizedBox(height: 16),

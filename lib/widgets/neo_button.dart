@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import '../theme/neo_theme.dart';
 
 class NeoButton extends StatefulWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final String text;
   final Color backgroundColor;
   final Widget? icon;
+  final bool isLoading;
 
   const NeoButton({
     super.key,
@@ -13,6 +14,7 @@ class NeoButton extends StatefulWidget {
     required this.text,
     this.backgroundColor = NeoTheme.yellow,
     this.icon,
+    this.isLoading = false,
   });
 
   @override
@@ -32,7 +34,7 @@ class _NeoButtonState extends State<NeoButton> {
     setState(() {
       _isPressed = false;
     });
-    widget.onPressed();
+    widget.onPressed?.call();
   }
 
   void _handleTapCancel() {
@@ -48,6 +50,7 @@ class _NeoButtonState extends State<NeoButton> {
       onTapUp: _handleTapUp,
       onTapCancel: _handleTapCancel,
       child: AnimatedContainer(
+        height: 55,
         duration: const Duration(milliseconds: 100),
         transform: Matrix4.translationValues(
           _isPressed ? 3.0 : 0.0,
@@ -72,24 +75,35 @@ class _NeoButtonState extends State<NeoButton> {
                   ),
                 ],
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (widget.icon != null) ...[
-              widget.icon!,
-              const SizedBox(width: 8),
-            ],
-            Text(
-              widget.text.toUpperCase(),
-              style: const TextStyle(
-                color: NeoTheme.black,
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
+        child: widget.isLoading
+            ? Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.black,
+                    strokeWidth: 2.5,
+                  ),
+                ),
+              )
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (widget.icon != null) ...[
+                    widget.icon!,
+                    const SizedBox(width: 8),
+                  ],
+                  Text(
+                    widget.text.toUpperCase(),
+                    style: const TextStyle(
+                      color: NeoTheme.black,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }

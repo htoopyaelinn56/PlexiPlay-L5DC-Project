@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:plexi_play/exceptions/auth_exception.dart' as ae;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseService {
@@ -8,14 +9,16 @@ class SupabaseService {
     await supabaseClient.auth.signOut();
   }
 
-  Future<void> login({required String email, required String password}) async {}
+  Future<void> login({required String email, required String password}) async {
+    throw ae.AuthException('Login not implemented yet');
+  }
 
   Future<void> signUp({
     required String email,
     required String password,
     required String username,
   }) async {
-    throw AuthException('Sign up not implemented yet');
+    throw ae.AuthException('Sign up not implemented yet');
   }
 }
 
