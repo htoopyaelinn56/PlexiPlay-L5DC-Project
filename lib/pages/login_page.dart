@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/neo_button.dart';
 import '../widgets/neo_text_field.dart';
@@ -34,6 +37,20 @@ class _LoginPageState extends State<LoginPage> {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => const FeedPage()),
     );
+  }
+
+  @override
+  void initState() {
+    _grantNotificationPermission();
+    super.initState();
+  }
+
+  void _grantNotificationPermission() async {
+    final hasNotificationPermission = await Permission.notification.isGranted;
+    if (!hasNotificationPermission) {
+      final status = await Permission.notification.request();
+      log('Notification permission status: $status');
+    }
   }
 
   @override
