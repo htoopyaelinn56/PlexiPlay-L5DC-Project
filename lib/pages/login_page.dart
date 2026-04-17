@@ -105,7 +105,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       _showErrorDialog('Missing Password', 'Please enter your password.');
       return;
     }
-    if (password.length < 6) {
+    if (password.length < 6 && !_isLogin) {
       _showErrorDialog(
         'Invalid Password',
         'Password must be at least 6 characters.',

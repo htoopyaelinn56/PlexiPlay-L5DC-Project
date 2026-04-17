@@ -1,16 +1,32 @@
+import 'dart:developer';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plexi_play/exceptions/auth_exception.dart' as ae;
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
 class SupabaseService {
-  static final supabaseClient = Supabase.instance.client;
+  static final supabaseClient = sb.Supabase.instance.client;
 
   Future<void> signOut() async {
     await supabaseClient.auth.signOut();
   }
 
   Future<void> login({required String email, required String password}) async {
-    throw ae.AuthException('Login not implemented yet');
+    try {
+      await supabaseClient.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      final userData = supabaseClient.auth.currentUser;
+      log(
+        'User data after login: ${userData?.email}, ${userData?.id}, ${userData?.userMetadata}',
+      );
+    } on sb.AuthException catch (e) {
+      throw ae.AuthException(e.message);
+    } catch (e) {
+      throw ae.AuthException('An unexpected error occurred. Please try again.');
+    }
   }
 
   Future<void> signUp({
@@ -18,7 +34,22 @@ class SupabaseService {
     required String password,
     required String username,
   }) async {
-    throw ae.AuthException('Sign up not implemented yet');
+    try {
+      await supabaseClient.auth.signUp(
+        email: email,
+        password: password,
+        data: {'username': username},
+      );
+
+      final userData = supabaseClient.auth.currentUser;
+      log(
+        'User data after sign up: ${userData?.email}, ${userData?.id}, ${userData?.userMetadata}',
+      );
+    } on sb.AuthException catch (e) {
+      throw ae.AuthException(e.message);
+    } catch (e) {
+      throw ae.AuthException('An unexpected error occurred. Please try again.');
+    }
   }
 }
 
