@@ -17,11 +17,14 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _usernameController = TextEditingController();
+  bool _isLogin = true;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _usernameController.dispose();
     super.dispose();
   }
 
@@ -154,22 +157,32 @@ class _LoginPageState extends State<LoginPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const Text(
-                              'Join PlexiPlay',
-                              style: TextStyle(
+                            Text(
+                              _isLogin ? 'Welcome Back!' : 'Join PlexiPlay',
+                              style: const TextStyle(
                                 fontSize: 32,
                                 fontWeight: FontWeight.w900,
                               ),
                             ),
                             const SizedBox(height: 8),
-                            const Text(
-                              'Enter your details below to log in or create a brand new account!',
-                              style: TextStyle(
+                            Text(
+                              _isLogin
+                                  ? 'Enter your details below to log in to your account!'
+                                  : 'Enter your details below to create a brand new account!',
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                             const SizedBox(height: 32),
+                            if (!_isLogin) ...[
+                              NeoTextField(
+                                controller: _usernameController,
+                                labelText: 'Username',
+                                hintText: 'johndoe',
+                              ),
+                              const SizedBox(height: 20),
+                            ],
                             NeoTextField(
                               controller: _emailController,
                               labelText: 'Email',
@@ -186,12 +199,32 @@ class _LoginPageState extends State<LoginPage> {
                             SizedBox(
                               width: double.infinity,
                               child: NeoButton(
-                                text: 'CONTINUE',
+                                text: _isLogin ? 'LOG IN' : 'SIGN UP',
                                 backgroundColor: NeoTheme.yellow,
                                 onPressed: _handleAuth,
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 16),
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _isLogin = !_isLogin;
+                                });
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: NeoTheme.black,
+                              ),
+                              child: Text(
+                                _isLogin
+                                    ? "Don't have an account? Sign Up"
+                                    : "Already have an account? Log In",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
                           ],
                         ),
                       ),
