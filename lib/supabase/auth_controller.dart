@@ -38,6 +38,18 @@ class AuthController extends AsyncNotifier<void> {
       }
     }
   }
+
+  Future<void> signOut() async {
+    state = const AsyncLoading();
+    try {
+      final supabaseService = ref.read(supabaseServiceProvider);
+      await supabaseService.signOut();
+      state = const AsyncData(null);
+    } catch (e, st) {
+      log('Error during sign out: $e, ${e.runtimeType}');
+      state = AsyncError('Something went wrong with logging out', st);
+    }
+  }
 }
 
 final authControllerProvider = AsyncNotifierProvider<AuthController, void>(() {

@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:plexi_play/supabase/auth_controller.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/post_card.dart';
 import '../widgets/neo_back_button.dart';
 import 'login_page.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   final String username;
 
   const ProfilePage({super.key, required this.username});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends ConsumerState<ProfilePage> {
   // Dummy profile posts
   final List<Map<String, String>> _myPosts = [
     {
@@ -32,11 +34,7 @@ class _ProfilePageState extends State<ProfilePage> {
   ];
 
   void _handleLogout() {
-    // Navigate back to logic, clearing the stack
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const LoginPage()),
-      (Route<dynamic> route) => false,
-    );
+    ref.read(authControllerProvider.notifier).signOut();
   }
 
   void _deletePost(int index) {
@@ -64,6 +62,31 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(authControllerProvider, (previous, next) {
+      if (next.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.error.toString()),
+            backgroundColor: Colors.redAccent,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      } else if (next.isLoading) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Logging out...'),
+            backgroundColor: Colors.orangeAccent,
+            duration: Duration(seconds: 1),
+          ),
+        );
+      } else if (next.hasValue) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+          (route) => false,
+        );
+      }
+    });
     return Scaffold(
       backgroundColor: NeoTheme.white,
       appBar: AppBar(

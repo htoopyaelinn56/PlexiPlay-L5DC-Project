@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +8,7 @@ import 'package:isar_plus/isar_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:plexi_play/local_db/downloaded_videos.dart';
 import 'package:plexi_play/local_db/isar_provider.dart';
+import 'package:plexi_play/pages/feed_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'pages/login_page.dart';
 
@@ -40,8 +43,31 @@ void main() async {
   );
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
+
+  @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  User? currentUser;
+
+  void getAuthState() {
+    final supabaseClient = Supabase.instance.client;
+    setState(() {
+      currentUser = supabaseClient.auth.currentUser;
+    });
+    log(
+      'User exists: ${currentUser != null}, going to ${currentUser == null ? 'LoginPage' : 'FeedPage'}',
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getAuthState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +80,7 @@ class MainApp extends StatelessWidget {
           Theme.of(context).textTheme,
         ),
       ),
-      home: const LoginPage(),
+      home: currentUser == null ? const LoginPage() : const FeedPage(),
     );
   }
 }

@@ -3,8 +3,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:plexi_play/exceptions/auth_exception.dart';
-import 'package:plexi_play/exceptions/custom_exception.dart';
 import 'package:plexi_play/supabase/auth_controller.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/neo_button.dart';
