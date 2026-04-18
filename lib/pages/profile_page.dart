@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:plexi_play/supabase/auth_controller.dart';
+import 'package:plexi_play/supabase/supabase_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/post_card.dart';
@@ -132,34 +133,60 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           const SizedBox(width: 8),
         ],
       ),
-      body: _myPosts.isEmpty
-          ? const Center(
+      body: ref
+          .watch(profileVideosStreamProvider)
+          .when(
+            data: (videos) {
+              if (videos.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'No videos yet!',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                      color: Colors.black54,
+                    ),
+                  ),
+                );
+              }
+              return CustomScrollView(
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.only(top: 8, bottom: 40),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final post = videos[index];
+                        return PostCard(
+                          videoUrl: post.videoUrl,
+                          username: post.username,
+                          thumbnailUrl: post.thumbnailUrl,
+                          description: post.title.isNotEmpty
+                              ? post.title
+                              : 'No description',
+                          isProfileView: true,
+                          onDelete: () => _deletePost(index),
+                          onEdit: () => _editPost(index),
+                        );
+                      }, childCount: videos.length),
+                    ),
+                  ),
+                ],
+              );
+            },
+            loading: () => const Center(
+              child: CircularProgressIndicator(color: NeoTheme.black),
+            ),
+            error: (error, stack) => Center(
               child: Text(
-                'No videos yet!',
-                style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18,
-                  color: Colors.black54,
+                'Error: $error',
+                style: const TextStyle(
+                  color: NeoTheme.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.only(top: 8, bottom: 40),
-              itemCount: _myPosts.length,
-              itemBuilder: (context, index) {
-                final post = _myPosts[index];
-                return PostCard(
-                  videoUrl: post['videoUrl']!,
-                  username: post['username']!,
-                  thumbnailUrl:
-                      'https://wbeifzoolcvpmsmgnskm.supabase.co/storage/v1/object/public/thumbnails/611246105bfdf.jpg',
-                  description: post['description']!,
-                  isProfileView: true,
-                  onDelete: () => _deletePost(index),
-                  onEdit: () => _editPost(index),
-                );
-              },
             ),
+          ),
     );
   }
 }
