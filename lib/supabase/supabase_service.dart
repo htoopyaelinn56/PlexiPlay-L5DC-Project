@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,43 +54,81 @@ class SupabaseService {
     }
   }
 
-  Stream<List<Videos>> getVideos(bool forProfile) async* {
+  Stream<List<Videos>> getVideos(bool forProfile) {
     final userId = supabaseClient.auth.currentUser?.id;
+    // Unique name per stream instance — avoids collision
+    final channelName =
+        'videos_${forProfile ? 'profile_${userId ?? 'anon'}' : 'all'}_${DateTime.now().millisecondsSinceEpoch}';
 
-    if (forProfile && userId == null) {
-      yield [];
-      return;
-    }
+    late StreamController<List<Videos>> controller;
+    sb.RealtimeChannel? channel;
 
-    // Listen to changes on the videos table conditionally
-    final stream = forProfile && userId != null
-        ? supabaseClient
-              .from('videos')
-              .stream(primaryKey: ['id'])
-              .eq('created_by', userId)
-        : supabaseClient.from('videos').stream(primaryKey: ['id']);
+    Future<void> fetchVideos() async {
+      try {
+        var query = supabaseClient
+            .from('videos')
+            .select('*, profiles(username)');
 
-    // Yield the joined data every time there's an update
-    await for (final _ in stream) {
-      var query = supabaseClient.from('videos').select('*, profiles(username)');
+        if (forProfile && userId != null) {
+          query = query.eq('created_by', userId);
+        }
 
-      if (forProfile && userId != null) {
-        query = query.eq('created_by', userId);
+        final response = await query.order('created_at', ascending: false);
+
+        if (!controller.isClosed) {
+          controller.add(
+            (response as List<dynamic>).map((video) {
+              return Videos(
+                id: video['id'] as String,
+                username: video['profiles']['username'] as String? ?? 'Unknown',
+                createdAt: DateTime.parse(
+                  video['created_at'] as String,
+                ).toLocal(),
+                title: video['title'] as String? ?? '',
+                thumbnailUrl: video['thumbnail_url'] as String? ?? '',
+                videoUrl: video['video_url'] as String? ?? '',
+              );
+            }).toList(),
+          );
+        }
+      } catch (e) {
+        log('Error fetching videos: $e');
+        if (!controller.isClosed) {
+          controller.addError(e);
+        }
       }
-
-      final response = await query.order('created_at', ascending: false);
-
-      yield (response as List<dynamic>).map((video) {
-        return Videos(
-          id: video['id'] as String,
-          username: video['profiles']['username'] as String? ?? 'Unknown',
-          createdAt: DateTime.parse(video['created_at'] as String).toLocal(),
-          title: video['title'] as String? ?? '',
-          thumbnailUrl: video['thumbnail_url'] as String? ?? '',
-          videoUrl: video['video_url'] as String? ?? '',
-        );
-      }).toList();
     }
+
+    controller = StreamController<List<Videos>>(
+      onListen: () async {
+        await fetchVideos();
+
+        channel = supabaseClient
+            .channel(channelName)
+            .onPostgresChanges(
+              event: sb.PostgresChangeEvent.all,
+              schema: 'public',
+              table: 'videos',
+              callback: (payload) {
+                log('🔥 [$channelName] event: ${payload.eventType}');
+                fetchVideos();
+              },
+            )
+            .subscribe((status, [error]) {
+              log('📶 [$channelName] status: $status');
+              if (error != null) log('❌ [$channelName] error: $error');
+            });
+      },
+      onCancel: () async {
+        log('🧹 Removing channel: $channelName');
+        if (channel != null) {
+          await supabaseClient.removeChannel(channel!);
+        }
+        await controller.close();
+      },
+    );
+
+    return controller.stream;
   }
 }
 

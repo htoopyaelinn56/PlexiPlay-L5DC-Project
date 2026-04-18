@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/post_card.dart';
 import '../supabase/supabase_service.dart';
@@ -8,11 +11,16 @@ import 'upload_page.dart';
 import 'profile_page.dart';
 import 'downloaded_videos_page.dart';
 
-class FeedPage extends ConsumerWidget {
+class FeedPage extends ConsumerStatefulWidget {
   const FeedPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FeedPage> createState() => _FeedPageState();
+}
+
+class _FeedPageState extends ConsumerState<FeedPage> {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: NeoTheme.cream,
       appBar: AppBar(
