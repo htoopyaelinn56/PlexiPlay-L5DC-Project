@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:video_compress/video_compress.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/neo_button.dart';
@@ -43,10 +44,29 @@ class _UploadPageState extends State<UploadPage> {
     final XFile? video = await picker.pickVideo(source: ImageSource.gallery);
 
     if (video != null) {
+      final tempFile = File(video.path);
+      final videoSize = await tempFile.length();
+      if (videoSize > 20 * 1024 * 1024) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Video size must be 20MB or less.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
       setState(() {
-        _selectedVideo = File(video.path);
+        _selectedVideo = tempFile;
       });
     }
+  }
+
+  Future<String> _uploadFileToSupabase(File file, String folder) async {
+    String url = '';
+    return url;
   }
 
   Future<void> _pickThumbnail() async {
@@ -54,8 +74,22 @@ class _UploadPageState extends State<UploadPage> {
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
+      final tempFile = File(image.path);
+      final thumbnailSize = await tempFile.length();
+      if (thumbnailSize > 2 * 1024 * 1024) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Thumbnail size must be 2MB or less.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
       setState(() {
-        _selectedThumbnail = File(image.path);
+        _selectedThumbnail = tempFile;
       });
     }
   }
@@ -91,34 +125,7 @@ class _UploadPageState extends State<UploadPage> {
       return;
     }
 
-    final videoSize = await _selectedVideo!.length();
-    if (videoSize > 20 * 1024 * 1024) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Video size must be 20MB or less.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-      return;
-    }
-
-    final thumbnailSize = await _selectedThumbnail!.length();
-    if (thumbnailSize > 2 * 1024 * 1024) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Thumbnail size must be 2MB or less.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-      return;
-    }
-
     try {
-      // ✨ Web-Optimizes (fast-start) the video by moving the moov atom to the front!
       // This solves the full-download buffering issue from Supabase!
       final MediaInfo? mediaInfo = await VideoCompress.compressVideo(
         _selectedVideo!.path,
@@ -128,14 +135,14 @@ class _UploadPageState extends State<UploadPage> {
       );
 
       if (mediaInfo != null && mediaInfo.file != null) {
-        final optimizedFile = mediaInfo.file!;
-        print('Original Size: \${_selectedVideo!.lengthSync()} bytes');
-        print('Optimized Size: \${optimizedFile.lengthSync()} bytes');
-
-        // TODO: Supabase Storage Upload Logic Here!
-        // final supabase = Supabase.instance.client;
-        // final path = 'videos/\${DateTime.now().millisecondsSinceEpoch}.mp4';
-        // await supabase.storage.from('posts').upload(path, optimizedFile);
+        final uploadedThumbnailUrl = await _uploadFileToSupabase(
+          _selectedThumbnail!,
+          'thumbnails',
+        );
+        final uploadedVideoUrl = await _uploadFileToSupabase(
+          File(mediaInfo.file!.path),
+          'videos',
+        );
 
         // After upload completes
         if (mounted) {
