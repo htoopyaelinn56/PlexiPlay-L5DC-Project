@@ -21,6 +21,7 @@ class _UploadPageState extends State<UploadPage> {
   final _descriptionController = TextEditingController();
   File? _selectedVideo;
   File? _selectedThumbnail;
+  String? uploadStatus;
 
   @override
   void initState() {
@@ -66,6 +67,7 @@ class _UploadPageState extends State<UploadPage> {
 
   Future<String> _uploadFileToSupabase(File file, String folder) async {
     String url = '';
+    await Future.delayed(const Duration(seconds: 1)); // Simulate upload delay
     return url;
   }
 
@@ -126,6 +128,9 @@ class _UploadPageState extends State<UploadPage> {
     }
 
     try {
+      setState(() {
+        uploadStatus = 'Compressing video...';
+      });
       // This solves the full-download buffering issue from Supabase!
       final MediaInfo? compressedVideo = await VideoCompress.compressVideo(
         _selectedVideo!.path,
@@ -135,24 +140,25 @@ class _UploadPageState extends State<UploadPage> {
       );
 
       if (compressedVideo != null && compressedVideo.file != null) {
+        setState(() {
+          uploadStatus = 'Uploading video...';
+        });
         final uploadedThumbnailUrl = await _uploadFileToSupabase(
           _selectedThumbnail!,
           'thumbnails',
         );
+
+        setState(() {
+          uploadStatus = 'Uploading thumbnail...';
+        });
         final uploadedVideoUrl = await _uploadFileToSupabase(
           File(compressedVideo.file!.path),
           'videos',
         );
 
-        // After upload completes
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Upload successfully optimized & uploaded!'),
-            ),
-          );
-          Navigator.pop(context);
-        }
+        setState(() {
+          uploadStatus = 'Saving post...';
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -312,7 +318,7 @@ class _UploadPageState extends State<UploadPage> {
               ),
               const SizedBox(height: 48),
               NeoButton(
-                text: 'UPLOAD POST',
+                text: uploadStatus ?? 'UPLOAD',
                 backgroundColor: NeoTheme.pink,
                 onPressed: _uploadVideo,
               ),
