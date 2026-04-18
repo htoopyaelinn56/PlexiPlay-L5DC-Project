@@ -53,16 +53,31 @@ class SupabaseService {
     }
   }
 
-  Stream<List<Videos>> getVideos() async* {
-    // Listen to changes on the videos table
-    final stream = supabaseClient.from('videos').stream(primaryKey: ['id']);
+  Stream<List<Videos>> getVideos(bool forProfile) async* {
+    final userId = supabaseClient.auth.currentUser?.id;
+
+    if (forProfile && userId == null) {
+      yield [];
+      return;
+    }
+
+    // Listen to changes on the videos table conditionally
+    final stream = forProfile && userId != null
+        ? supabaseClient
+              .from('videos')
+              .stream(primaryKey: ['id'])
+              .eq('created_by', userId)
+        : supabaseClient.from('videos').stream(primaryKey: ['id']);
 
     // Yield the joined data every time there's an update
     await for (final _ in stream) {
-      final response = await supabaseClient
-          .from('videos')
-          .select('*, profiles(username)')
-          .order('created_at', ascending: false);
+      var query = supabaseClient.from('videos').select('*, profiles(username)');
+
+      if (forProfile && userId != null) {
+        query = query.eq('created_by', userId);
+      }
+
+      final response = await query.order('created_at', ascending: false);
 
       yield (response as List<dynamic>).map((video) {
         return Videos(
@@ -82,5 +97,10 @@ final supabaseServiceProvider = Provider((ref) => SupabaseService());
 
 final videosStreamProvider = StreamProvider<List<Videos>>((ref) {
   final supabaseService = ref.watch(supabaseServiceProvider);
-  return supabaseService.getVideos();
+  return supabaseService.getVideos(false);
+});
+
+final profileVideosStreamProvider = StreamProvider<List<Videos>>((ref) {
+  final supabaseService = ref.watch(supabaseServiceProvider);
+  return supabaseService.getVideos(true);
 });
