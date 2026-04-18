@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plexi_play/exceptions/auth_exception.dart' as ae;
+import 'package:plexi_play/supabase/videos.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
 class SupabaseService {
@@ -51,6 +52,35 @@ class SupabaseService {
       throw ae.AuthException('An unexpected error occurred. Please try again.');
     }
   }
+
+  Stream<List<Videos>> getVideos() async* {
+    // Listen to changes on the videos table
+    final stream = supabaseClient.from('videos').stream(primaryKey: ['id']);
+
+    // Yield the joined data every time there's an update
+    await for (final _ in stream) {
+      final response = await supabaseClient
+          .from('videos')
+          .select('*, profiles(username)')
+          .order('created_at', ascending: false);
+
+      yield (response as List<dynamic>).map((video) {
+        return Videos(
+          id: video['id'] as String,
+          username: video['profiles']['username'] as String? ?? 'Unknown',
+          createdAt: DateTime.parse(video['created_at'] as String).toLocal(),
+          title: video['title'] as String? ?? '',
+          thumbnailUrl: video['thumbnail_url'] as String? ?? '',
+          videoUrl: video['video_url'] as String? ?? '',
+        );
+      }).toList();
+    }
+  }
 }
 
 final supabaseServiceProvider = Provider((ref) => SupabaseService());
+
+final videosStreamProvider = StreamProvider<List<Videos>>((ref) {
+  final supabaseService = ref.watch(supabaseServiceProvider);
+  return supabaseService.getVideos();
+});

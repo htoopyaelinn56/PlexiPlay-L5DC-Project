@@ -21,3 +21,14 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+create table if not exists public.videos (
+  id uuid not null default gen_random_uuid (),
+  created_at timestamp with time zone not null default now(),
+  created_by uuid not null default auth.uid (),
+  title text null,
+  thumbnail_url text null,
+  video_url text null,
+  constraint videos_pkey primary key (id),
+  constraint videos_created_by_fkey foreign KEY (created_by) references profiles (id) on update CASCADE on delete CASCADE
+) TABLESPACE pg_default;
