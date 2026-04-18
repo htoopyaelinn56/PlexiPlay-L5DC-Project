@@ -46,11 +46,11 @@ class _UploadPageState extends State<UploadPage> {
     if (video != null) {
       final tempFile = File(video.path);
       final videoSize = await tempFile.length();
-      if (videoSize > 20 * 1024 * 1024) {
+      if (videoSize > 30 * 1024 * 1024) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Video size must be 20MB or less.'),
+              content: Text('Video size must be 30MB or less.'),
               backgroundColor: Colors.red,
             ),
           );
@@ -76,11 +76,11 @@ class _UploadPageState extends State<UploadPage> {
     if (image != null) {
       final tempFile = File(image.path);
       final thumbnailSize = await tempFile.length();
-      if (thumbnailSize > 2 * 1024 * 1024) {
+      if (thumbnailSize > 3 * 1024 * 1024) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Thumbnail size must be 2MB or less.'),
+              content: Text('Thumbnail size must be 3MB or less.'),
               backgroundColor: Colors.red,
             ),
           );
@@ -127,20 +127,20 @@ class _UploadPageState extends State<UploadPage> {
 
     try {
       // This solves the full-download buffering issue from Supabase!
-      final MediaInfo? mediaInfo = await VideoCompress.compressVideo(
+      final MediaInfo? compressedVideo = await VideoCompress.compressVideo(
         _selectedVideo!.path,
         quality: VideoQuality.DefaultQuality,
         deleteOrigin: false,
         includeAudio: true,
       );
 
-      if (mediaInfo != null && mediaInfo.file != null) {
+      if (compressedVideo != null && compressedVideo.file != null) {
         final uploadedThumbnailUrl = await _uploadFileToSupabase(
           _selectedThumbnail!,
           'thumbnails',
         );
         final uploadedVideoUrl = await _uploadFileToSupabase(
-          File(mediaInfo.file!.path),
+          File(compressedVideo.file!.path),
           'videos',
         );
 
