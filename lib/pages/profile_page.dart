@@ -1,22 +1,40 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:plexi_play/supabase/auth_controller.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/post_card.dart';
 import '../widgets/neo_back_button.dart';
 import 'login_page.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
-  final String username;
-
-  const ProfilePage({super.key, required this.username});
+  const ProfilePage({super.key});
 
   @override
   ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
+  late String currentUsername;
+
+  void getAuthState() {
+    final supabaseClient = Supabase.instance.client;
+    setState(() {
+      currentUsername =
+          supabaseClient.auth.currentUser?.userMetadata?['username'] ??
+          'Profile';
+    });
+  }
+
+  @override
+  void initState() {
+    getAuthState();
+    super.initState();
+  }
+
   // Dummy profile posts
   final List<Map<String, String>> _myPosts = [
     {
@@ -95,7 +113,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         leadingWidth: 64,
         title: Text(
-          widget.username,
+          currentUsername,
           style: const TextStyle(
             color: NeoTheme.black,
             fontWeight: FontWeight.w900,
