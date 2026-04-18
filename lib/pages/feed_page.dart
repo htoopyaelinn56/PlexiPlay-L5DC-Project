@@ -128,6 +128,7 @@ class FeedPage extends ConsumerWidget {
             error: (error, stack) => Center(
               child: Text(
                 'Error: $error',
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: NeoTheme.black,
                   fontSize: 16,
