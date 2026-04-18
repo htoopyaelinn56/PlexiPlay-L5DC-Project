@@ -18,7 +18,7 @@ class PostCard extends ConsumerStatefulWidget {
   final String description;
   final bool isProfileView;
   final VoidCallback? onDelete;
-  final VoidCallback? onHide;
+  final VoidCallback? onEdit;
 
   const PostCard({
     super.key,
@@ -28,7 +28,7 @@ class PostCard extends ConsumerStatefulWidget {
     required this.description,
     this.isProfileView = false,
     this.onDelete,
-    this.onHide,
+    this.onEdit,
   });
 
   @override
@@ -191,8 +191,8 @@ class _PostCardState extends ConsumerState<PostCard> {
                       color: NeoTheme.black,
                     ),
                     onSelected: (value) {
-                      if (value == 'hide') {
-                        widget.onHide?.call();
+                      if (value == 'edit') {
+                        widget.onEdit?.call();
                       } else if (value == 'delete') {
                         widget.onDelete?.call();
                       }
@@ -201,9 +201,9 @@ class _PostCardState extends ConsumerState<PostCard> {
                     itemBuilder: (BuildContext context) =>
                         <PopupMenuEntry<String>>[
                           const PopupMenuItem<String>(
-                            value: 'hide',
+                            value: 'edit',
                             child: Text(
-                              'Hide Post',
+                              'Edit',
                               style: TextStyle(fontWeight: FontWeight.w700),
                             ),
                           ),

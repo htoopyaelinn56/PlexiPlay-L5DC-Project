@@ -68,14 +68,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  void _hidePost(int index) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Post hidden from your profile.'),
-        backgroundColor: Colors.blueAccent,
-        duration: Duration(seconds: 2),
-      ),
-    );
+  void _editPost(int index) {
+    // navigate to upload page
   }
 
   @override
@@ -162,7 +156,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   description: post['description']!,
                   isProfileView: true,
                   onDelete: () => _deletePost(index),
-                  onHide: () => _hidePost(index),
+                  onEdit: () => _editPost(index),
                 );
               },
             ),
