@@ -6,7 +6,6 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:open_file/open_file.dart';
 import 'package:plexi_play/local_db/downloaded_videos_repository.dart';
 import '../theme/neo_theme.dart';
 import '../pages/video_player_page.dart';
@@ -14,6 +13,7 @@ import '../pages/comments_page.dart';
 
 class PostCard extends ConsumerStatefulWidget {
   final String videoUrl;
+  final String thumbnailUrl;
   final String username;
   final String description;
   final bool isProfileView;
@@ -23,6 +23,7 @@ class PostCard extends ConsumerStatefulWidget {
   const PostCard({
     super.key,
     required this.videoUrl,
+    required this.thumbnailUrl,
     required this.username,
     required this.description,
     this.isProfileView = false,
@@ -114,7 +115,7 @@ class _PostCardState extends ConsumerState<PostCard> {
           await downloadedVideoRepository.saveOfflineVideos(
             filePath: path,
             title: widget.description,
-            thumbnailUrl: '',
+            thumbnailUrl: widget.thumbnailUrl,
             videoUrl: widget.videoUrl,
             author: widget.username,
           );
@@ -243,8 +244,9 @@ class _PostCardState extends ConsumerState<PostCard> {
                 alignment: Alignment.center,
                 children: [
                   Image.network(
-                    'https://example.com/video_thumbnail.jpg',
-                    color: Colors.black26,
+                    widget.thumbnailUrl,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(color: NeoTheme.black.withAlpha(10));
                     },

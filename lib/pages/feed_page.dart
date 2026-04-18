@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/post_card.dart';
+import '../supabase/supabase_service.dart';
 import 'upload_page.dart';
 import 'profile_page.dart';
 import 'downloaded_videos_page.dart';
 
-class FeedPage extends StatelessWidget {
+class FeedPage extends ConsumerWidget {
   const FeedPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: NeoTheme.cream,
       appBar: AppBar(
@@ -85,25 +87,58 @@ class FeedPage extends StatelessWidget {
           child: Container(color: NeoTheme.black, height: 3),
         ),
       ),
-      body: CustomScrollView(
-        slivers: [
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) => PostCard(
-                videoUrl:
-                    'https://wbeifzoolcvpmsmgnskm.supabase.co/storage/v1/object/public/videos/2026-04-14-16-13-22-622.mp4',
-                username: 'User_${index + 1}',
-                description:
-                    'Check out this cool bee hovering around! Nature is always incredible. 🐝🌿 #Nature #NeoBrutalism',
+      body: ref
+          .watch(videosStreamProvider)
+          .when(
+            data: (videos) {
+              if (videos.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'No videos yet.\nBe the first to upload!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: NeoTheme.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                );
+              }
+              return CustomScrollView(
+                slivers: [
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final video = videos[index];
+                      return PostCard(
+                        videoUrl: video.videoUrl,
+                        thumbnailUrl: video.thumbnailUrl,
+                        username: video.username,
+                        description: video.title.isNotEmpty
+                            ? video.title
+                            : 'No description',
+                      );
+                    }, childCount: videos.length),
+                  ),
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 120), // Extra space at the bottom
+                  ),
+                ],
+              );
+            },
+            loading: () => const Center(
+              child: CircularProgressIndicator(color: NeoTheme.black),
+            ),
+            error: (error, stack) => Center(
+              child: Text(
+                'Error: $error',
+                style: const TextStyle(
+                  color: NeoTheme.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              childCount: 5,
             ),
           ),
-          SliverToBoxAdapter(
-            child: SizedBox(height: 120), // Extra space at the bottom
-          ),
-        ],
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(

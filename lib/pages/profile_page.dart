@@ -139,6 +139,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 return PostCard(
                   videoUrl: post['videoUrl']!,
                   username: post['username']!,
+                  thumbnailUrl:
+                      'https://wbeifzoolcvpmsmgnskm.supabase.co/storage/v1/object/public/thumbnails/611246105bfdf.jpg',
                   description: post['description']!,
                   isProfileView: true,
                   onDelete: () => _deletePost(index),

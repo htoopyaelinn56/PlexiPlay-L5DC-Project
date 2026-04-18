@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:plexi_play/local_db/downloaded_videos.dart';
 import 'package:plexi_play/local_db/downloaded_videos_repository.dart';
 import 'package:plexi_play/pages/video_player_page.dart';
@@ -103,9 +104,10 @@ class DownloadedVideosPage extends ConsumerWidget {
                       ),
                     ),
                     trailing: IconButton(
-                      icon: const Icon(
-                        Icons.play_circle_filled_rounded,
-                        color: NeoTheme.black,
+                      icon: HugeIcon(
+                        icon: HugeIcons.strokeRoundedPlayCircle,
+                        secondaryColor: Colors.blue,
+                        strokeWidth: 2,
                         size: 32,
                       ),
                       onPressed: () async {
