@@ -20,7 +20,6 @@ class _UploadPageState extends State<UploadPage> {
   final _descriptionController = TextEditingController();
   File? _selectedVideo;
   File? _selectedThumbnail;
-  bool _isCompressing = false;
 
   @override
   void initState() {
@@ -62,11 +61,61 @@ class _UploadPageState extends State<UploadPage> {
   }
 
   Future<void> _uploadVideo() async {
-    if (_selectedVideo == null) return;
+    if (_selectedVideo == null ||
+        _selectedThumbnail == null ||
+        _descriptionController.text.trim().isEmpty) {
+      final errorMessage = () {
+        if (_selectedVideo == null &&
+            _selectedThumbnail == null &&
+            _descriptionController.text.trim().isEmpty) {
+          return 'Please select a video, a thumbnail, and provide a caption.';
+        } else if (_selectedThumbnail == null &&
+            _descriptionController.text.trim().isEmpty) {
+          return 'Please select a thumbnail and provide a caption.';
+        } else if (_selectedVideo == null &&
+            _descriptionController.text.trim().isEmpty) {
+          return 'Please select a video and provide a caption.';
+        } else if (_selectedVideo == null && _selectedThumbnail == null) {
+          return 'Please select a video and a thumbnail.';
+        } else if (_selectedVideo == null) {
+          return 'Please select a video.';
+        } else if (_selectedThumbnail == null) {
+          return 'Please select a thumbnail.';
+        } else {
+          return 'Please provide a caption.';
+        }
+      }();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+      );
+      return;
+    }
 
-    setState(() {
-      _isCompressing = true;
-    });
+    final videoSize = await _selectedVideo!.length();
+    if (videoSize > 20 * 1024 * 1024) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Video size must be 20MB or less.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    final thumbnailSize = await _selectedThumbnail!.length();
+    if (thumbnailSize > 2 * 1024 * 1024) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Thumbnail size must be 2MB or less.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
 
     try {
       // ✨ Web-Optimizes (fast-start) the video by moving the moov atom to the front!
@@ -98,10 +147,15 @@ class _UploadPageState extends State<UploadPage> {
           Navigator.pop(context);
         }
       }
-    } finally {
-      setState(() {
-        _isCompressing = false;
-      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Something went wrong during uploading.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -140,7 +194,7 @@ class _UploadPageState extends State<UploadPage> {
                   Expanded(
                     child: InkWell(
                       borderRadius: BorderRadius.circular(12),
-                      onTap: _isCompressing ? null : _pickVideo,
+                      onTap: _pickVideo,
                       child: Container(
                         height: 140,
                         padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -192,7 +246,7 @@ class _UploadPageState extends State<UploadPage> {
                   Expanded(
                     child: InkWell(
                       borderRadius: BorderRadius.circular(12),
-                      onTap: _isCompressing ? null : _pickThumbnail,
+                      onTap: _pickThumbnail,
                       child: Container(
                         height: 140,
                         padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -250,24 +304,11 @@ class _UploadPageState extends State<UploadPage> {
                 controller: _descriptionController,
               ),
               const SizedBox(height: 48),
-
-              if (_isCompressing)
-                Column(
-                  children: [
-                    const CircularProgressIndicator(color: NeoTheme.pink),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Optimizing for Web & Streaming...',
-                      style: TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                  ],
-                )
-              else
-                NeoButton(
-                  text: 'UPLOAD POST',
-                  backgroundColor: NeoTheme.pink,
-                  onPressed: _uploadVideo,
-                ),
+              NeoButton(
+                text: 'UPLOAD POST',
+                backgroundColor: NeoTheme.pink,
+                onPressed: _uploadVideo,
+              ),
             ],
           ),
         ),
