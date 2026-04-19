@@ -393,5 +393,8 @@ final commentsStreamProvider = StreamProvider.family<List<Comments>, String>((
   videoId,
 ) {
   final supabaseService = ref.watch(supabaseServiceProvider);
+  ref.watch(
+    authStateControllerProvider,
+  ); // Watch userId to trigger refresh when it changes
   return supabaseService.getComments(videoId);
 });
