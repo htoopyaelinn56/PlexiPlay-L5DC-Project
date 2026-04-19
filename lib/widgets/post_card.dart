@@ -327,7 +327,7 @@ class _PostCardState extends ConsumerState<PostCard> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              '${widget.video.likeCount > 0 ? '${widget.video.likeCount} ' : ''}LIKE${widget.video.likeCount == 0 ? '' : 'S'}',
+                              '${widget.video.likeCount > 0 ? '${widget.video.likeCount} ' : ''}LIKE${widget.video.likeCount <= 1 ? '' : 'S'}',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
