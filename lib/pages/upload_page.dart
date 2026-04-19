@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:plexi_play/main.dart';
 import 'package:plexi_play/supabase/video_upload_controller.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide MultipartFile;
+import 'package:uuid/uuid.dart';
 import '../main.dart';
 import '../supabase/videos.dart';
 import '../theme/neo_theme.dart';
@@ -88,7 +89,8 @@ class _UploadPageState extends ConsumerState<UploadPage> {
 
   Future<String> _uploadFileToSupabase(File file, String folder) async {
     final supabase = Supabase.instance.client;
-    final fileName = file.path.split('/').last;
+    final uuid = const Uuid().v4();
+    final fileName = '${uuid}_${file.path.split('/').last}';
 
     final storageUrl = '$supabaseUrl/storage/v1/object/$folder/$fileName';
     final accessToken = supabase.auth.currentSession?.accessToken ?? '';
