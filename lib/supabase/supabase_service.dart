@@ -9,6 +9,7 @@ import 'package:plexi_play/supabase/videos.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
 import 'comments.dart';
+import 'notes.dart';
 
 class SupabaseService {
   static final supabaseClient = sb.Supabase.instance.client;
@@ -373,6 +374,89 @@ class SupabaseService {
       throw VideoUploadException('Failed to delete video. Please try again.');
     }
   }
+
+  Stream<List<Notes>> getNotesForVideo(String videoId) {
+    final channelName =
+        'notes_video_${videoId}_${DateTime.now().millisecondsSinceEpoch}';
+
+    late StreamController<List<Notes>> controller;
+    sb.RealtimeChannel? channel;
+
+    final userId = supabaseClient.auth.currentUser?.id;
+
+    if (userId == null) {
+      throw ae.AuthException('User not authenticated');
+    }
+
+    Future<void> fetchNotes() async {
+      try {
+        final response = await supabaseClient
+            .from('notes')
+            .select('*, profiles(username)')
+            .eq('video_id', videoId)
+            .eq('created_by', userId)
+            .order('created_at', ascending: true);
+
+        if (!controller.isClosed) {
+          controller.add(
+            (response as List<dynamic>).map((note) {
+              return Notes(
+                id: note['id'] as String,
+                createdBy: note['created_by'] as String,
+                videoId: note['video_id'] as String,
+                note: note['note'] as String,
+                createdAt: DateTime.parse(
+                  note['created_at'] as String,
+                ).toLocal(),
+                timestamp: note['timestamp'] as String,
+              );
+            }).toList(),
+          );
+        }
+      } catch (e) {
+        log('Error fetching notes: $e');
+        if (!controller.isClosed) {
+          controller.addError(e);
+        }
+      }
+    }
+
+    controller = StreamController<List<Notes>>(
+      onListen: () async {
+        await fetchNotes();
+
+        channel = supabaseClient
+            .channel(channelName)
+            .onPostgresChanges(
+              event: sb.PostgresChangeEvent.all,
+              schema: 'public',
+              table: 'notes',
+              filter: sb.PostgresChangeFilter(
+                type: sb.PostgresChangeFilterType.eq,
+                column: 'video_id',
+                value: videoId,
+              ),
+              callback: (payload) {
+                log('📝 [$channelName] event: ${payload.eventType}');
+                fetchNotes();
+              },
+            )
+            .subscribe((status, [error]) {
+              log('📶 [$channelName] status: $status');
+              if (error != null) log('❌ [$channelName] error: $error');
+            });
+      },
+      onCancel: () async {
+        log('🧹 Removing channel: $channelName');
+        if (channel != null) {
+          await supabaseClient.removeChannel(channel!);
+        }
+        await controller.close();
+      },
+    );
+
+    return controller.stream;
+  }
 }
 
 final supabaseServiceProvider = Provider((ref) => SupabaseService());
@@ -397,4 +481,15 @@ final commentsStreamProvider = StreamProvider.family<List<Comments>, String>((
     authStateControllerProvider,
   ); // Watch userId to trigger refresh when it changes
   return supabaseService.getComments(videoId);
+});
+
+final notesStreamProvider = StreamProvider.family<List<Notes>, String>((
+  ref,
+  videoId,
+) {
+  final supabaseService = ref.watch(supabaseServiceProvider);
+  ref.watch(
+    authStateControllerProvider,
+  ); // Watch userId to trigger refresh when it changes
+  return supabaseService.getNotesForVideo(videoId);
 });
