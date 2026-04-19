@@ -92,60 +92,91 @@ class _FeedPageState extends ConsumerState<FeedPage> {
           child: Container(color: NeoTheme.black, height: 3),
         ),
       ),
-      body: ref
-          .watch(videosStreamProvider)
-          .when(
-            data: (videos) {
-              if (videos.isEmpty) {
-                return const Center(
-                  child: Text(
-                    'No videos yet.\nBe the first to upload!',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: NeoTheme.black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
+      body: RefreshIndicator(
+        color: NeoTheme.black,
+        onRefresh: () async {
+          ref.invalidate(videosStreamProvider);
+        },
+        child: ref
+            .watch(videosStreamProvider(false))
+            .when(
+              data: (videos) {
+                if (videos.isEmpty) {
+                  return ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const [
+                      SizedBox(
+                        height: 500,
+                        child: Center(
+                          child: Text(
+                            'No videos yet.\nBe the first to upload!',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: NeoTheme.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                return CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final video = videos[index];
+                        return PostCard(
+                          videoUrl: video.videoUrl,
+                          thumbnailUrl: video.thumbnailUrl,
+                          username: video.username,
+                          createdAt: video.createdAt,
+                          description: video.title.isNotEmpty
+                              ? video.title
+                              : 'No description',
+                        );
+                      }, childCount: videos.length),
+                    ),
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: 120), // Extra space at the bottom
+                    ),
+                  ],
+                );
+              },
+              loading: () => ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const [
+                  SizedBox(
+                    height: 500,
+                    child: Center(
+                      child: CircularProgressIndicator(color: NeoTheme.black),
                     ),
                   ),
-                );
-              }
-              return CustomScrollView(
-                slivers: [
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final video = videos[index];
-                      return PostCard(
-                        videoUrl: video.videoUrl,
-                        thumbnailUrl: video.thumbnailUrl,
-                        username: video.username,
-                        createdAt: video.createdAt,
-                        description: video.title.isNotEmpty
-                            ? video.title
-                            : 'No description',
-                      );
-                    }, childCount: videos.length),
-                  ),
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: 120), // Extra space at the bottom
+                ],
+              ),
+              error: (error, stack) => ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  SizedBox(
+                    height: 500,
+                    child: Center(
+                      child: Text(
+                        'Error: $error',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: NeoTheme.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
-              );
-            },
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: NeoTheme.black),
-            ),
-            error: (error, stack) => Center(
-              child: Text(
-                'Error: $error',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: NeoTheme.black,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
               ),
             ),
-          ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(

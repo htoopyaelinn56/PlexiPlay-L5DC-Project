@@ -177,18 +177,11 @@ class SupabaseService {
 
 final supabaseServiceProvider = Provider((ref) => SupabaseService());
 
-final videosStreamProvider = StreamProvider<List<Videos>>((ref) {
+final videosStreamProvider = StreamProvider.family<List<Videos>, bool>((ref, forProfile) {
   final supabaseService = ref.watch(supabaseServiceProvider);
   ref.watch(
     authStateControllerProvider,
   ); // Watch userId to trigger refresh when it changes
-  return supabaseService.getVideos(false);
+  return supabaseService.getVideos(forProfile);
 });
 
-final profileVideosStreamProvider = StreamProvider<List<Videos>>((ref) {
-  final supabaseService = ref.watch(supabaseServiceProvider);
-  ref.watch(
-    authStateControllerProvider,
-  ); // Watch userId to trigger refresh when it changes
-  return supabaseService.getVideos(true);
-});

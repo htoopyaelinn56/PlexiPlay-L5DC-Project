@@ -24,7 +24,6 @@ class VideoUploadController extends AsyncNotifier<void> {
       );
       state = const AsyncValue.data(null);
       ref.invalidate(videosStreamProvider);
-      ref.invalidate(profileVideosStreamProvider);
     } catch (e, st) {
       if (e is CustomException) {
         state = AsyncValue.error(e.message, st);
@@ -42,7 +41,6 @@ class VideoUploadController extends AsyncNotifier<void> {
       await supabaseService.editVideo(id: id, title: title);
       state = const AsyncValue.data(null);
       ref.invalidate(videosStreamProvider);
-      ref.invalidate(profileVideosStreamProvider);
     } catch (e, st) {
       if (e is CustomException) {
         state = AsyncValue.error(e.message, st);

@@ -120,23 +120,37 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           const SizedBox(width: 8),
         ],
       ),
-      body: ref
-          .watch(profileVideosStreamProvider)
-          .when(
+      body: RefreshIndicator(
+        color: NeoTheme.black,
+        onRefresh: () async {
+          ref.invalidate(videosStreamProvider);
+        },
+        child: ref
+            .watch(videosStreamProvider(true))
+            .when(
             data: (videos) {
               if (videos.isEmpty) {
-                return const Center(
-                  child: Text(
-                    'No videos yet!',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 18,
-                      color: Colors.black54,
+                return ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const [
+                    SizedBox(
+                      height: 500,
+                      child: Center(
+                        child: Text(
+                          'No videos yet!',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 );
               }
               return CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
                   SliverPadding(
                     padding: const EdgeInsets.only(top: 8, bottom: 40),
@@ -161,21 +175,38 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ],
               );
             },
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: NeoTheme.black),
-            ),
-            error: (error, stack) => Center(
-              child: Text(
-                'Error: $error',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: NeoTheme.black,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+            loading: () => ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(
+                  height: 500,
+                  child: Center(
+                    child: CircularProgressIndicator(color: NeoTheme.black),
+                  ),
                 ),
-              ),
+              ],
+            ),
+            error: (error, stack) => ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(
+                  height: 500,
+                  child: Center(
+                    child: Text(
+                      'Error: $error',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: NeoTheme.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
+      ),
     );
   }
 }
