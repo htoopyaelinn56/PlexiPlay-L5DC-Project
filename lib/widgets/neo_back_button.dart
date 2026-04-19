@@ -2,12 +2,20 @@ import 'package:flutter/material.dart';
 import '../theme/neo_theme.dart';
 
 class NeoBackButton extends StatelessWidget {
-  const NeoBackButton({super.key});
+  const NeoBackButton({super.key, this.onTap});
+
+  final void Function()? onTap;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.pop(context),
+      onTap: () {
+        if (onTap != null) {
+          onTap!();
+        } else {
+          Navigator.pop(context);
+        }
+      },
       child: Container(
         padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(

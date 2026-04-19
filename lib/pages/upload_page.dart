@@ -221,7 +221,25 @@ class _UploadPageState extends ConsumerState<UploadPage> {
       backgroundColor: NeoTheme.cream,
       appBar: AppBar(
         leading: Row(
-          children: [const SizedBox(width: 20), const NeoBackButton()],
+          children: [
+            const SizedBox(width: 20),
+            NeoBackButton(
+              onTap: () {
+                if (uploadStatus != null) {
+                  // Prevent navigating back while upload is in progress
+                  // show 'Please wait for the upload to finish' message
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please wait for the upload to finish.'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                } else {
+                  Navigator.pop(context);
+                }
+              },
+            ),
+          ],
         ),
         leadingWidth: 64,
         backgroundColor: NeoTheme.white,
