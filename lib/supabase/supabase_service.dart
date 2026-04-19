@@ -190,15 +190,62 @@ class SupabaseService {
       throw VideoUploadException('Failed to edit video. Please try again.');
     }
   }
+
+  Future<void> likeOrDislike({
+    required String videoId,
+    required bool like,
+  }) async {
+    final userId = supabaseClient.auth.currentUser?.id;
+    if (userId == null) {
+      throw ae.AuthException('User not authenticated');
+    }
+
+    try {
+      if (like) {
+        await supabaseClient.from('videos_likes').insert({
+          'video_id': videoId,
+          'liked_by': userId,
+        });
+      } else {
+        await supabaseClient
+            .from('videos_likes')
+            .delete()
+            .eq('video_id', videoId)
+            .eq('liked_by', userId);
+      }
+
+      // also get count from like of that video and write to videos like_count column
+      final likeCountResponse = await supabaseClient
+          .from('videos_likes')
+          .count()
+          .eq('video_id', videoId);
+
+      final likeCount = likeCountResponse as int? ?? 0;
+
+      // Update the like_count in the videos table
+      await supabaseClient
+          .from('videos')
+          .update({'like_count': likeCount})
+          .eq('id', videoId);
+
+    } catch (e) {
+      log('Error liking/disliking video: $e');
+      throw VideoUploadException(
+        'Failed to ${like ? 'like' : 'dislike'} video. Please try again.',
+      );
+    }
+  }
 }
 
 final supabaseServiceProvider = Provider((ref) => SupabaseService());
 
-final videosStreamProvider = StreamProvider.family<List<Videos>, bool>((ref, forProfile) {
+final videosStreamProvider = StreamProvider.family<List<Videos>, bool>((
+  ref,
+  forProfile,
+) {
   final supabaseService = ref.watch(supabaseServiceProvider);
   ref.watch(
     authStateControllerProvider,
   ); // Watch userId to trigger refresh when it changes
   return supabaseService.getVideos(forProfile);
 });
-
