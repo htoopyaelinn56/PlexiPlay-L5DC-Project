@@ -146,7 +146,7 @@ class _UploadPageState extends ConsumerState<UploadPage> {
 
       if (compressedVideo != null && compressedVideo.file != null) {
         setState(() {
-          uploadStatus = 'Uploading video...';
+          uploadStatus = 'Uploading thumbnail...';
         });
         final uploadedThumbnailUrl = await _uploadFileToSupabase(
           _selectedThumbnail!,
@@ -154,7 +154,7 @@ class _UploadPageState extends ConsumerState<UploadPage> {
         );
 
         setState(() {
-          uploadStatus = 'Uploading thumbnail...';
+          uploadStatus = 'Uploading video...';
         });
         final uploadedVideoUrl = await _uploadFileToSupabase(
           File(compressedVideo.file!.path),
@@ -170,11 +170,11 @@ class _UploadPageState extends ConsumerState<UploadPage> {
             );
       }
     } catch (e, st) {
-      setState(() {
-        uploadStatus = null;
-      });
       log('$e $st', name: 'UploadPage._uploadVideo');
       if (mounted) {
+        setState(() {
+          uploadStatus = null;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Something went wrong during uploading.'),
