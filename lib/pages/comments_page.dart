@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/neo_theme.dart';
+import '../widgets/neo_back_button.dart';
 
 class Comment {
   final String username;
@@ -88,25 +89,10 @@ class _CommentsPageState extends State<CommentsPage> {
         backgroundColor: NeoTheme.white,
         elevation: 0,
         centerTitle: false,
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: NeoTheme.white,
-              border: Border.all(color: NeoTheme.black, width: 2),
-              borderRadius: BorderRadius.circular(6),
-              boxShadow: const [
-                BoxShadow(color: NeoTheme.black, offset: Offset(2, 2)),
-              ],
-            ),
-            child: const Icon(
-              Icons.arrow_back_rounded,
-              color: NeoTheme.black,
-              size: 20,
-            ),
-          ),
+        leading: Row(
+          children: [const SizedBox(width: 20), const NeoBackButton()],
         ),
+        leadingWidth: 64,
         title: Text(
           'Comments',
           style: const TextStyle(
@@ -127,7 +113,7 @@ class _CommentsPageState extends State<CommentsPage> {
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16).copyWith(left: 20,right: 20),
                 itemCount: _comments.length,
                 itemBuilder: (context, index) {
                   final comment = _comments[index];
