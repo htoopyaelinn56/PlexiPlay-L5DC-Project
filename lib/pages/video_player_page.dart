@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
+import '../supabase/supabase_service.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/neo_back_button.dart';
 
@@ -10,6 +12,7 @@ class VideoPlayerPage extends StatefulWidget {
   final String username;
   final String description;
   final bool isLocalFile;
+  final String videoId;
 
   const VideoPlayerPage({
     super.key,
@@ -17,6 +20,7 @@ class VideoPlayerPage extends StatefulWidget {
     required this.username,
     required this.description,
     this.isLocalFile = false,
+    required this.videoId,
   });
 
   @override
@@ -94,6 +98,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       barrierDismissible: false,
       builder: (context) {
         return NotesListDialog(
+          videoId: widget.videoUrl,
           onClose: () {
             Navigator.pop(context);
             _controller.play();
@@ -389,19 +394,19 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   }
 }
 
-class NotesListDialog extends StatelessWidget {
+class NotesListDialog extends ConsumerWidget {
   final VoidCallback onClose;
+  final String videoId;
 
-  const NotesListDialog({super.key, required this.onClose});
+  const NotesListDialog({
+    super.key,
+    required this.onClose,
+    required this.videoId,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    final List<Map<String, String>> dummyNotes = [
-      {'time': '00:05', 'text': 'Whoa, look at that lighting!'},
-      {'time': '00:12', 'text': 'Need to remember this transition effect.'},
-      {'time': '00:20', 'text': 'The music drops right here, perfectly timed.'},
-    ];
-
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncValue = ref.watch(notesStreamProvider(videoId));
     return Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -444,52 +449,52 @@ class NotesListDialog extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            Expanded(
-              child: ListView.separated(
-                itemCount: dummyNotes.length,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final note = dummyNotes[index];
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 12,
-                      horizontal: 16,
-                    ),
-                    decoration: BoxDecoration(
-                      color: NeoTheme.white,
-                      border: Border.all(color: NeoTheme.black, width: 2),
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: const [
-                        BoxShadow(color: NeoTheme.black, offset: Offset(2, 2)),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '@ ${note['time']}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 14,
-                            color: NeoTheme.pink,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          note['text']!,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                            color: NeoTheme.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
+            // Expanded(
+            //   child: ListView.separated(
+            //     itemCount: dummyNotes.length,
+            //     separatorBuilder: (context, index) =>
+            //         const SizedBox(height: 12),
+            //     itemBuilder: (context, index) {
+            //       final note = dummyNotes[index];
+            //       return Container(
+            //         padding: const EdgeInsets.symmetric(
+            //           vertical: 12,
+            //           horizontal: 16,
+            //         ),
+            //         decoration: BoxDecoration(
+            //           color: NeoTheme.white,
+            //           border: Border.all(color: NeoTheme.black, width: 2),
+            //           borderRadius: BorderRadius.circular(8),
+            //           boxShadow: const [
+            //             BoxShadow(color: NeoTheme.black, offset: Offset(2, 2)),
+            //           ],
+            //         ),
+            //         child: Column(
+            //           crossAxisAlignment: CrossAxisAlignment.start,
+            //           children: [
+            //             Text(
+            //               '@ ${note['time']}',
+            //               style: const TextStyle(
+            //                 fontWeight: FontWeight.w900,
+            //                 fontSize: 14,
+            //                 color: NeoTheme.pink,
+            //               ),
+            //             ),
+            //             const SizedBox(height: 4),
+            //             Text(
+            //               note['text']!,
+            //               style: const TextStyle(
+            //                 fontWeight: FontWeight.w600,
+            //                 fontSize: 16,
+            //                 color: NeoTheme.black,
+            //               ),
+            //             ),
+            //           ],
+            //         ),
+            //       );
+            //     },
+            //   ),
+            // ),
           ],
         ),
       ),

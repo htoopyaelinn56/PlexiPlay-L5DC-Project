@@ -26,6 +26,7 @@ final DownloadedVideosSchema = IsarGeneratedSchema(
       IsarPropertySchema(name: 'thumbnailUrl', type: IsarType.string),
       IsarPropertySchema(name: 'videoUrl', type: IsarType.string),
       IsarPropertySchema(name: 'author', type: IsarType.string),
+      IsarPropertySchema(name: 'videoId', type: IsarType.string),
     ],
     indexes: [],
   ),
@@ -44,6 +45,7 @@ int serializeDownloadedVideos(IsarWriter writer, DownloadedVideos object) {
   IsarCore.writeString(writer, 3, object.thumbnailUrl);
   IsarCore.writeString(writer, 4, object.videoUrl);
   IsarCore.writeString(writer, 5, object.author);
+  IsarCore.writeString(writer, 6, object.videoId);
   return object.id;
 }
 
@@ -61,6 +63,8 @@ DownloadedVideos deserializeDownloadedVideos(IsarReader reader) {
   _videoUrl = IsarCore.readString(reader, 4) ?? '';
   final String _author;
   _author = IsarCore.readString(reader, 5) ?? '';
+  final String _videoId;
+  _videoId = IsarCore.readString(reader, 6) ?? '';
   final object = DownloadedVideos(
     id: _id,
     filePath: _filePath,
@@ -68,6 +72,7 @@ DownloadedVideos deserializeDownloadedVideos(IsarReader reader) {
     thumbnailUrl: _thumbnailUrl,
     videoUrl: _videoUrl,
     author: _author,
+    videoId: _videoId,
   );
   return object;
 }
@@ -87,6 +92,8 @@ dynamic deserializeDownloadedVideosProp(IsarReader reader, int property) {
       return IsarCore.readString(reader, 4) ?? '';
     case 5:
       return IsarCore.readString(reader, 5) ?? '';
+    case 6:
+      return IsarCore.readString(reader, 6) ?? '';
     default:
       throw ArgumentError('Unknown property: $property');
   }
@@ -100,6 +107,7 @@ sealed class _DownloadedVideosUpdate {
     String? thumbnailUrl,
     String? videoUrl,
     String? author,
+    String? videoId,
   });
 }
 
@@ -116,6 +124,7 @@ class _DownloadedVideosUpdateImpl implements _DownloadedVideosUpdate {
     Object? thumbnailUrl = ignore,
     Object? videoUrl = ignore,
     Object? author = ignore,
+    Object? videoId = ignore,
   }) {
     return collection.updateProperties(
           [id],
@@ -125,6 +134,7 @@ class _DownloadedVideosUpdateImpl implements _DownloadedVideosUpdate {
             if (thumbnailUrl != ignore) 3: thumbnailUrl as String?,
             if (videoUrl != ignore) 4: videoUrl as String?,
             if (author != ignore) 5: author as String?,
+            if (videoId != ignore) 6: videoId as String?,
           },
         ) >
         0;
@@ -139,6 +149,7 @@ sealed class _DownloadedVideosUpdateAll {
     String? thumbnailUrl,
     String? videoUrl,
     String? author,
+    String? videoId,
   });
 }
 
@@ -155,6 +166,7 @@ class _DownloadedVideosUpdateAllImpl implements _DownloadedVideosUpdateAll {
     Object? thumbnailUrl = ignore,
     Object? videoUrl = ignore,
     Object? author = ignore,
+    Object? videoId = ignore,
   }) {
     return collection.updateProperties(id, {
       if (filePath != ignore) 1: filePath as String?,
@@ -162,6 +174,7 @@ class _DownloadedVideosUpdateAllImpl implements _DownloadedVideosUpdateAll {
       if (thumbnailUrl != ignore) 3: thumbnailUrl as String?,
       if (videoUrl != ignore) 4: videoUrl as String?,
       if (author != ignore) 5: author as String?,
+      if (videoId != ignore) 6: videoId as String?,
     });
   }
 }
@@ -180,6 +193,7 @@ sealed class _DownloadedVideosQueryUpdate {
     String? thumbnailUrl,
     String? videoUrl,
     String? author,
+    String? videoId,
   });
 }
 
@@ -196,6 +210,7 @@ class _DownloadedVideosQueryUpdateImpl implements _DownloadedVideosQueryUpdate {
     Object? thumbnailUrl = ignore,
     Object? videoUrl = ignore,
     Object? author = ignore,
+    Object? videoId = ignore,
   }) {
     return query.updateProperties(limit: limit, {
       if (filePath != ignore) 1: filePath as String?,
@@ -203,6 +218,7 @@ class _DownloadedVideosQueryUpdateImpl implements _DownloadedVideosQueryUpdate {
       if (thumbnailUrl != ignore) 3: thumbnailUrl as String?,
       if (videoUrl != ignore) 4: videoUrl as String?,
       if (author != ignore) 5: author as String?,
+      if (videoId != ignore) 6: videoId as String?,
     });
   }
 }
@@ -229,6 +245,7 @@ class _DownloadedVideosQueryBuilderUpdateImpl
     Object? thumbnailUrl = ignore,
     Object? videoUrl = ignore,
     Object? author = ignore,
+    Object? videoId = ignore,
   }) {
     final q = query.build();
     try {
@@ -238,6 +255,7 @@ class _DownloadedVideosQueryBuilderUpdateImpl
         if (thumbnailUrl != ignore) 3: thumbnailUrl as String?,
         if (videoUrl != ignore) 4: videoUrl as String?,
         if (author != ignore) 5: author as String?,
+        if (videoId != ignore) 6: videoId as String?,
       });
     } finally {
       q.close();
@@ -1012,6 +1030,147 @@ extension DownloadedVideosQueryFilter
       );
     });
   }
+
+  QueryBuilder<DownloadedVideos, DownloadedVideos, QAfterFilterCondition>
+  videoIdEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 6, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadedVideos, DownloadedVideos, QAfterFilterCondition>
+  videoIdGreaterThan(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 6,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadedVideos, DownloadedVideos, QAfterFilterCondition>
+  videoIdGreaterThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 6,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadedVideos, DownloadedVideos, QAfterFilterCondition>
+  videoIdLessThan(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 6, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadedVideos, DownloadedVideos, QAfterFilterCondition>
+  videoIdLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 6,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadedVideos, DownloadedVideos, QAfterFilterCondition>
+  videoIdBetween(String lower, String upper, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 6,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadedVideos, DownloadedVideos, QAfterFilterCondition>
+  videoIdStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 6,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadedVideos, DownloadedVideos, QAfterFilterCondition>
+  videoIdEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 6,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadedVideos, DownloadedVideos, QAfterFilterCondition>
+  videoIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 6,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadedVideos, DownloadedVideos, QAfterFilterCondition>
+  videoIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 6,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadedVideos, DownloadedVideos, QAfterFilterCondition>
+  videoIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const EqualCondition(property: 6, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadedVideos, DownloadedVideos, QAfterFilterCondition>
+  videoIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterCondition(property: 6, value: ''),
+      );
+    });
+  }
 }
 
 extension DownloadedVideosQueryObject
@@ -1103,6 +1262,21 @@ extension DownloadedVideosQuerySortBy
       return query.addSortBy(5, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
+
+  QueryBuilder<DownloadedVideos, DownloadedVideos, QAfterSortBy> sortByVideoId({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(6, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DownloadedVideos, DownloadedVideos, QAfterSortBy>
+  sortByVideoIdDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(6, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
 }
 
 extension DownloadedVideosQuerySortThenBy
@@ -1191,6 +1365,21 @@ extension DownloadedVideosQuerySortThenBy
       return query.addSortBy(5, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
+
+  QueryBuilder<DownloadedVideos, DownloadedVideos, QAfterSortBy> thenByVideoId({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(6, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DownloadedVideos, DownloadedVideos, QAfterSortBy>
+  thenByVideoIdDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(6, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
 }
 
 extension DownloadedVideosQueryWhereDistinct
@@ -1227,6 +1416,13 @@ extension DownloadedVideosQueryWhereDistinct
   distinctByAuthor({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(5, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DownloadedVideos, DownloadedVideos, QAfterDistinct>
+  distinctByVideoId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(6, caseSensitive: caseSensitive);
     });
   }
 }
@@ -1267,6 +1463,12 @@ extension DownloadedVideosQueryProperty1
   QueryBuilder<DownloadedVideos, String, QAfterProperty> authorProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(5);
+    });
+  }
+
+  QueryBuilder<DownloadedVideos, String, QAfterProperty> videoIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(6);
     });
   }
 }
@@ -1311,6 +1513,13 @@ extension DownloadedVideosQueryProperty2<R>
       return query.addProperty(5);
     });
   }
+
+  QueryBuilder<DownloadedVideos, (R, String), QAfterProperty>
+  videoIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(6);
+    });
+  }
 }
 
 extension DownloadedVideosQueryProperty3<R1, R2>
@@ -1353,6 +1562,13 @@ extension DownloadedVideosQueryProperty3<R1, R2>
   authorProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(5);
+    });
+  }
+
+  QueryBuilder<DownloadedVideos, (R1, R2, String), QOperations>
+  videoIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(6);
     });
   }
 }

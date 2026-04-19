@@ -14,6 +14,7 @@ class DownloadedVideosRepository {
     required String thumbnailUrl,
     required String videoUrl,
     required String author,
+    required String videoId,
   }) async {
     await isar.writeAsync((isar) {
       final newVideo = DownloadedVideos(
@@ -23,6 +24,7 @@ class DownloadedVideosRepository {
         thumbnailUrl: thumbnailUrl,
         videoUrl: videoUrl,
         author: author,
+        videoId: videoId,
       );
       isar.downloadedVideos.put(newVideo);
     });

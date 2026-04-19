@@ -12,6 +12,9 @@ class DownloadedVideos {
   final String videoUrl;
   final String author;
 
+  // supabase uuid
+  final String videoId;
+
   DownloadedVideos({
     required this.id,
     required this.filePath,
@@ -19,5 +22,6 @@ class DownloadedVideos {
     required this.thumbnailUrl,
     required this.videoUrl,
     required this.author,
+    required this.videoId,
   });
 }

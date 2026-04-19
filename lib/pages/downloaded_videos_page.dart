@@ -150,6 +150,7 @@ class DownloadedVideosPage extends ConsumerWidget {
             isLocalFile: true,
             username: video.author,
             description: video.title,
+            videoId: video.videoId,
           ),
         ),
       );

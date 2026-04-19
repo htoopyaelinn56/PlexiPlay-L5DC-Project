@@ -44,6 +44,7 @@ class _PostCardState extends ConsumerState<PostCard> {
           videoUrl: widget.video.videoUrl,
           username: widget.video.username,
           description: widget.video.title,
+          videoId: widget.video.id,
         ),
       ),
     );
@@ -171,6 +172,7 @@ class _PostCardState extends ConsumerState<PostCard> {
             thumbnailUrl: widget.video.thumbnailUrl,
             videoUrl: widget.video.videoUrl,
             author: widget.video.username,
+            videoId: widget.video.id,
           );
         }
       }
