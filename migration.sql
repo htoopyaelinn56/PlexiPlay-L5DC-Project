@@ -60,6 +60,18 @@ create table public.videos_likes
     constraint videos_likes_video_id_fkey foreign KEY (video_id) references videos (id) on update CASCADE on delete CASCADE
 ) TABLESPACE pg_default;
 
+create table public.comments
+(
+    id         uuid                     not null default gen_random_uuid(),
+    created_at timestamp with time zone not null default now(),
+    user_id    uuid null,
+    video_id   uuid null,
+    comment    text null,
+    constraint comments_pkey primary key (id),
+    constraint comments_user_id_fkey foreign KEY (user_id) references profiles (id) on update CASCADE on delete CASCADE,
+    constraint comments_video_id_fkey foreign KEY (video_id) references videos (id) on update CASCADE on delete CASCADE
+) TABLESPACE pg_default;
+
 -- Allow anyone (logged in or not) to UPLOAD to the 'images' and 'videos' buckets
 CREATE
 POLICY "Public Upload"
