@@ -89,115 +89,16 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     _controller.pause();
     setState(() => _isPlaying = false);
 
-    // Dummy notes to show
-    final List<Map<String, String>> dummyNotes = [
-      {'time': '00:05', 'text': 'Whoa, look at that lighting!'},
-      {'time': '00:12', 'text': 'Need to remember this transition effect.'},
-      {'time': '00:20', 'text': 'The music drops right here, perfectly timed.'},
-    ];
-
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: Container(
-            constraints: const BoxConstraints(maxHeight: 400),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: NeoTheme.green,
-              border: Border.all(
-                color: NeoTheme.black,
-                width: NeoTheme.borderThick,
-              ),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: const [
-                BoxShadow(color: NeoTheme.black, offset: Offset(6, 6)),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Saved Notes',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        color: NeoTheme.black,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.close_rounded,
-                        color: NeoTheme.black,
-                        size: 28,
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _controller.play();
-                        setState(() => _isPlaying = true);
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: ListView.separated(
-                    itemCount: dummyNotes.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final note = dummyNotes[index];
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 16,
-                        ),
-                        decoration: BoxDecoration(
-                          color: NeoTheme.white,
-                          border: Border.all(color: NeoTheme.black, width: 2),
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: NeoTheme.black,
-                              offset: Offset(2, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '@ ${note['time']}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 14,
-                                color: NeoTheme.pink,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              note['text']!,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                color: NeoTheme.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
+        return NotesListDialog(
+          onClose: () {
+            Navigator.pop(context);
+            _controller.play();
+            setState(() => _isPlaying = true);
+          },
         );
       },
     );
@@ -208,141 +109,35 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     _controller.pause();
     setState(() => _isPlaying = false);
 
-    final noteController = TextEditingController();
-
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: NeoTheme.blue,
-              border: Border.all(
-                color: NeoTheme.black,
-                width: NeoTheme.borderThick,
+        return AddNoteDialog(
+          timestamp: timestamp,
+          onClose: () {
+            Navigator.pop(context);
+            _controller.play();
+            setState(() => _isPlaying = true);
+          },
+          onSave: () {
+            Navigator.pop(context);
+            _controller.play();
+            setState(() => _isPlaying = true);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Note saved at $timestamp!',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: NeoTheme.black,
+                  ),
+                ),
+                duration: Duration(seconds: 1),
+                backgroundColor: NeoTheme.green,
               ),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: const [
-                BoxShadow(color: NeoTheme.black, offset: Offset(6, 6)),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Note at $timestamp',
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        color: NeoTheme.black,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.close_rounded,
-                        color: NeoTheme.black,
-                        size: 28,
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _controller.play();
-                        setState(() => _isPlaying = true);
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  decoration: BoxDecoration(
-                    color: NeoTheme.white,
-                    border: Border.all(color: NeoTheme.black, width: 2),
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: const [
-                      BoxShadow(color: NeoTheme.black, offset: Offset(2, 2)),
-                    ],
-                  ),
-                  child: TextField(
-                    controller: noteController,
-                    maxLines: 3,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                    decoration: const InputDecoration(
-                      hintText: 'Type your awesome thoughts...',
-                      hintStyle: TextStyle(fontWeight: FontWeight.w500),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.all(12),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        // TODO: Save to Supabase
-                        Navigator.pop(context);
-                        _controller.play();
-                        setState(() => _isPlaying = true);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Note saved at $timestamp!',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                                color: NeoTheme.black,
-                              ),
-                            ),
-                            backgroundColor: NeoTheme.green,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              side: const BorderSide(
-                                color: NeoTheme.black,
-                                width: 2,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: NeoTheme.yellow,
-                          border: Border.all(color: NeoTheme.black, width: 2),
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: NeoTheme.black,
-                              offset: Offset(2, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Text(
-                          'Save Note',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            color: NeoTheme.black,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+            );
+          },
         );
       },
     );
@@ -587,6 +382,251 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   ),
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class NotesListDialog extends StatelessWidget {
+  final VoidCallback onClose;
+
+  const NotesListDialog({super.key, required this.onClose});
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Map<String, String>> dummyNotes = [
+      {'time': '00:05', 'text': 'Whoa, look at that lighting!'},
+      {'time': '00:12', 'text': 'Need to remember this transition effect.'},
+      {'time': '00:20', 'text': 'The music drops right here, perfectly timed.'},
+    ];
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: Container(
+        constraints: const BoxConstraints(maxHeight: 400),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: NeoTheme.green,
+          border: Border.all(
+            color: NeoTheme.black,
+            width: NeoTheme.borderThick,
+          ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: const [
+            BoxShadow(color: NeoTheme.black, offset: Offset(6, 6)),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Saved Notes',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: NeoTheme.black,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: NeoTheme.black,
+                    size: 28,
+                  ),
+                  onPressed: onClose,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: ListView.separated(
+                itemCount: dummyNotes.length,
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final note = dummyNotes[index];
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      color: NeoTheme.white,
+                      border: Border.all(color: NeoTheme.black, width: 2),
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: const [
+                        BoxShadow(color: NeoTheme.black, offset: Offset(2, 2)),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '@ ${note['time']}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 14,
+                            color: NeoTheme.pink,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          note['text']!,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                            color: NeoTheme.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AddNoteDialog extends StatefulWidget {
+  final String timestamp;
+  final VoidCallback onClose;
+  final VoidCallback onSave;
+
+  const AddNoteDialog({
+    super.key,
+    required this.timestamp,
+    required this.onClose,
+    required this.onSave,
+  });
+
+  @override
+  State<AddNoteDialog> createState() => _AddNoteDialogState();
+}
+
+class _AddNoteDialogState extends State<AddNoteDialog> {
+  late TextEditingController _noteController;
+
+  @override
+  void initState() {
+    super.initState();
+    _noteController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: NeoTheme.blue,
+          border: Border.all(
+            color: NeoTheme.black,
+            width: NeoTheme.borderThick,
+          ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: const [
+            BoxShadow(color: NeoTheme.black, offset: Offset(6, 6)),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Note at ${widget.timestamp}',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: NeoTheme.black,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: NeoTheme.black,
+                    size: 28,
+                  ),
+                  onPressed: widget.onClose,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: NeoTheme.white,
+                border: Border.all(color: NeoTheme.black, width: 2),
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: const [
+                  BoxShadow(color: NeoTheme.black, offset: Offset(2, 2)),
+                ],
+              ),
+              child: TextField(
+                controller: _noteController,
+                maxLines: 3,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+                decoration: const InputDecoration(
+                  hintText: 'Type your awesome thoughts...',
+                  hintStyle: TextStyle(fontWeight: FontWeight.w500),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.all(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    // TODO: Save to Supabase
+                    widget.onSave();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: NeoTheme.yellow,
+                      border: Border.all(color: NeoTheme.black, width: 2),
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: const [
+                        BoxShadow(color: NeoTheme.black, offset: Offset(2, 2)),
+                      ],
+                    ),
+                    child: const Text(
+                      'Save Note',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: NeoTheme.black,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
