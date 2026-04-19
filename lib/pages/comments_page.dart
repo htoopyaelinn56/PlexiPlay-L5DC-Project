@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:plexi_play/supabase/supabase_service.dart';
+import '../supabase/comment_controller.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/neo_back_button.dart';
 
@@ -30,9 +31,9 @@ class _CommentsPageState extends ConsumerState<CommentsPage> {
     final text = _commentController.text.trim();
     if (text.isEmpty) return;
 
-    // call comment controller
-
-    _commentController.clear();
+    ref
+        .read(commentControllerProvider.notifier)
+        .addComment(videoId: widget.videoId, comment: text);
 
     // Scroll to bottom after adding a new comment
     if (_scrollController.hasClients) {
@@ -48,6 +49,22 @@ class _CommentsPageState extends ConsumerState<CommentsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(commentControllerProvider);
+    ref.listen(commentControllerProvider, (prev, next) {
+      next.whenOrNull(
+        data: (_) {
+          _commentController.clear();
+        },
+        error: (e, st) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.toString()),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        },
+      );
+    });
     return Scaffold(
       backgroundColor: NeoTheme.cream,
       appBar: AppBar(
@@ -299,10 +316,18 @@ class _CommentsPageState extends ConsumerState<CommentsPage> {
                                 _isButtonPressed ? 3.0 : 0.0,
                                 0.0,
                               ),
-                              child: const Icon(
-                                Icons.send_rounded,
-                                color: NeoTheme.black,
-                              ),
+                              child: state.isLoading
+                                  ? Padding(
+                                      padding: EdgeInsetsGeometry.all(10),
+                                      child: CircularProgressIndicator(
+                                        color: Colors.black,
+                                        strokeWidth: 3,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.send_rounded,
+                                      color: NeoTheme.black,
+                                    ),
                             ),
                           ),
                         ],

@@ -313,6 +313,27 @@ class SupabaseService {
 
     return controller.stream;
   }
+
+  Future<void> addComment({
+    required String videoId,
+    required String comment,
+  }) async {
+    final userId = supabaseClient.auth.currentUser?.id;
+    if (userId == null) {
+      throw ae.AuthException('User not authenticated');
+    }
+
+    try {
+      await supabaseClient.from('comments').insert({
+        'video_id': videoId,
+        'comment': comment,
+        'user_id': userId,
+      });
+    } catch (e) {
+      log('Error adding comment: $e');
+      throw VideoUploadException('Failed to add comment. Please try again.');
+    }
+  }
 }
 
 final supabaseServiceProvider = Provider((ref) => SupabaseService());
