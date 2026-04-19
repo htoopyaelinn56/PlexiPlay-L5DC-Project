@@ -342,6 +342,27 @@ class SupabaseService {
     }
 
     try {
+      // get thumbnail url and video url of that video and delete from storage
+      final response = await supabaseClient
+          .from('videos')
+          .select('thumbnail_url, video_url')
+          .eq('id', videoId)
+          .eq('created_by', userId)
+          .single();
+
+      final thumbnailUrl = response['thumbnail_url'] as String?;
+      final videoUrl = response['video_url'] as String?;
+
+      if (thumbnailUrl != null) {
+        final thumbnailPath = thumbnailUrl.split('/').last;
+        await supabaseClient.storage.from('images').remove([thumbnailPath]);
+      }
+
+      if (videoUrl != null) {
+        final videoPath = videoUrl.split('/').last;
+        await supabaseClient.storage.from('videos').remove([videoPath]);
+      }
+
       await supabaseClient
           .from('videos')
           .delete()
