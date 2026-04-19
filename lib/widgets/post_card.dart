@@ -182,7 +182,11 @@ class _PostCardState extends ConsumerState<PostCard> {
                           fontSize: 16,
                         ),
                       ),
-                      Text(DateFormat('MMM d, yyyy').format(widget.video.createdAt)),
+                      Text(
+                        DateFormat(
+                          'MMM d, yyyy',
+                        ).format(widget.video.createdAt),
+                      ),
                     ],
                   ),
                 ),
@@ -316,8 +320,8 @@ class _PostCardState extends ConsumerState<PostCard> {
                               size: 24,
                             ),
                             const SizedBox(width: 6),
-                            const Text(
-                              'LIKE',
+                            Text(
+                              '${widget.video.likeCount > 0 ? '${widget.video.likeCount} ' : ''}LIKE${widget.video.likeCount == 0 ? '' : 'S'}',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
