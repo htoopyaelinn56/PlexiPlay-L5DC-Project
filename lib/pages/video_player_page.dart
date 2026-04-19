@@ -2,12 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:plexi_play/supabase/note_create_controller.dart';
 import 'package:video_player/video_player.dart';
 import '../supabase/supabase_service.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/neo_back_button.dart';
 
-class VideoPlayerPage extends StatefulWidget {
+class VideoPlayerPage extends ConsumerStatefulWidget {
   final String videoUrl;
   final String username;
   final String description;
@@ -24,10 +25,10 @@ class VideoPlayerPage extends StatefulWidget {
   });
 
   @override
-  State<VideoPlayerPage> createState() => _VideoPlayerPageState();
+  ConsumerState<VideoPlayerPage> createState() => _VideoPlayerPageState();
 }
 
-class _VideoPlayerPageState extends State<VideoPlayerPage> {
+class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
   late VideoPlayerController _controller;
   bool _isPlaying = false;
   bool _isMuted = false;
@@ -125,23 +126,17 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             _controller.play();
             setState(() => _isPlaying = true);
           },
-          onSave: () {
+          onSave: (note) {
             Navigator.pop(context);
             _controller.play();
             setState(() => _isPlaying = true);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Note saved at $timestamp!',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: NeoTheme.black,
-                  ),
-                ),
-                duration: Duration(seconds: 1),
-                backgroundColor: NeoTheme.green,
-              ),
-            );
+            ref
+                .read(noteCreateControllerProvider.notifier)
+                .createNote(
+                  videoId: widget.videoId,
+                  note: note,
+                  timestamp: timestamp,
+                );
           },
         );
       },
@@ -150,6 +145,37 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(noteCreateControllerProvider, (prev, next) {
+      next.whenOrNull(
+        error: (e, st) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.toString()),
+              backgroundColor: Colors.redAccent,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        },
+        loading: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Saving note...'),
+              backgroundColor: Colors.orangeAccent,
+              duration: Duration(seconds: 1),
+            ),
+          );
+        },
+        data: (_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Note saved!'),
+              backgroundColor: NeoTheme.green,
+              duration: Duration(seconds: 1),
+            ),
+          );
+        },
+      );
+    });
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -452,7 +478,7 @@ class NotesListDialog extends ConsumerWidget {
             Expanded(
               child: asyncValue.when(
                 data: (data) {
-                  if(data.isEmpty) {
+                  if (data.isEmpty) {
                     return const Center(
                       child: Text(
                         'No notes yet! Add one at your current timestamp.',
@@ -540,10 +566,10 @@ class NotesListDialog extends ConsumerWidget {
   }
 }
 
-class AddNoteDialog extends StatefulWidget {
+class AddNoteDialog extends ConsumerStatefulWidget {
   final String timestamp;
   final VoidCallback onClose;
-  final VoidCallback onSave;
+  final Function(String) onSave;
 
   const AddNoteDialog({
     super.key,
@@ -553,10 +579,10 @@ class AddNoteDialog extends StatefulWidget {
   });
 
   @override
-  State<AddNoteDialog> createState() => _AddNoteDialogState();
+  ConsumerState<AddNoteDialog> createState() => _AddNoteDialogState();
 }
 
-class _AddNoteDialogState extends State<AddNoteDialog> {
+class _AddNoteDialogState extends ConsumerState<AddNoteDialog> {
   late TextEditingController _noteController;
 
   @override
@@ -642,8 +668,7 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    // TODO: Save to Supabase
-                    widget.onSave();
+                    widget.onSave(_noteController.text.trim());
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(

@@ -457,6 +457,29 @@ class SupabaseService {
 
     return controller.stream;
   }
+
+  Future<void> addNotes({
+    required String videoId,
+    required String note,
+    required String timestamp,
+  }) async {
+    final userId = supabaseClient.auth.currentUser?.id;
+    if (userId == null) {
+      throw ae.AuthException('User not authenticated');
+    }
+
+    try {
+      await supabaseClient.from('notes').insert({
+        'video_id': videoId,
+        'note': note,
+        'timestamp': timestamp,
+        'created_by': userId,
+      });
+    } catch (e) {
+      log('Error adding note: $e');
+      throw VideoUploadException('Failed to add note. Please try again.');
+    }
+  }
 }
 
 final supabaseServiceProvider = Provider((ref) => SupabaseService());
