@@ -98,7 +98,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       barrierDismissible: false,
       builder: (context) {
         return NotesListDialog(
-          videoId: widget.videoUrl,
+          videoId: widget.videoId,
           onClose: () {
             Navigator.pop(context);
             _controller.play();
@@ -449,52 +449,90 @@ class NotesListDialog extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-            // Expanded(
-            //   child: ListView.separated(
-            //     itemCount: dummyNotes.length,
-            //     separatorBuilder: (context, index) =>
-            //         const SizedBox(height: 12),
-            //     itemBuilder: (context, index) {
-            //       final note = dummyNotes[index];
-            //       return Container(
-            //         padding: const EdgeInsets.symmetric(
-            //           vertical: 12,
-            //           horizontal: 16,
-            //         ),
-            //         decoration: BoxDecoration(
-            //           color: NeoTheme.white,
-            //           border: Border.all(color: NeoTheme.black, width: 2),
-            //           borderRadius: BorderRadius.circular(8),
-            //           boxShadow: const [
-            //             BoxShadow(color: NeoTheme.black, offset: Offset(2, 2)),
-            //           ],
-            //         ),
-            //         child: Column(
-            //           crossAxisAlignment: CrossAxisAlignment.start,
-            //           children: [
-            //             Text(
-            //               '@ ${note['time']}',
-            //               style: const TextStyle(
-            //                 fontWeight: FontWeight.w900,
-            //                 fontSize: 14,
-            //                 color: NeoTheme.pink,
-            //               ),
-            //             ),
-            //             const SizedBox(height: 4),
-            //             Text(
-            //               note['text']!,
-            //               style: const TextStyle(
-            //                 fontWeight: FontWeight.w600,
-            //                 fontSize: 16,
-            //                 color: NeoTheme.black,
-            //               ),
-            //             ),
-            //           ],
-            //         ),
-            //       );
-            //     },
-            //   ),
-            // ),
+            Expanded(
+              child: asyncValue.when(
+                data: (data) {
+                  if(data.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'No notes yet! Add one at your current timestamp.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black54,
+                          fontSize: 18,
+                        ),
+                      ),
+                    );
+                  }
+                  return ListView.separated(
+                    itemCount: data.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final note = data[index];
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          color: NeoTheme.white,
+                          border: Border.all(color: NeoTheme.black, width: 2),
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: NeoTheme.black,
+                              offset: Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '@ ${note.timestamp}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 14,
+                                color: NeoTheme.pink,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              note.note,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                color: NeoTheme.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+                error: (e, st) {
+                  return Center(
+                    child: Text(
+                      'Failed to load notes',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black,
+                        fontSize: 20,
+                      ),
+                    ),
+                  );
+                },
+                loading: () {
+                  return const Center(
+                    child: CircularProgressIndicator(color: NeoTheme.black),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),

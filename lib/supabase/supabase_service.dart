@@ -401,7 +401,7 @@ class SupabaseService {
           controller.add(
             (response as List<dynamic>).map((note) {
               return Notes(
-                id: note['id'] as String,
+                id: note['id'].toString(),
                 createdBy: note['created_by'] as String,
                 videoId: note['video_id'] as String,
                 note: note['note'] as String,
