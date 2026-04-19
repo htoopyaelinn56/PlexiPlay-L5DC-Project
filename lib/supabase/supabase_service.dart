@@ -334,6 +334,24 @@ class SupabaseService {
       throw VideoUploadException('Failed to add comment. Please try again.');
     }
   }
+
+  Future<void> deletePost({required String videoId}) async {
+    final userId = supabaseClient.auth.currentUser?.id;
+    if (userId == null) {
+      throw ae.AuthException('User not authenticated');
+    }
+
+    try {
+      await supabaseClient
+          .from('videos')
+          .delete()
+          .eq('id', videoId)
+          .eq('created_by', userId);
+    } catch (e) {
+      log('Error deleting video: $e');
+      throw VideoUploadException('Failed to delete video. Please try again.');
+    }
+  }
 }
 
 final supabaseServiceProvider = Provider((ref) => SupabaseService());
@@ -349,9 +367,10 @@ final videosStreamProvider = StreamProvider.family<List<Videos>, bool>((
   return supabaseService.getVideos(forProfile);
 });
 
-final commentsStreamProvider = StreamProvider.family<List<Comments>, String>(
-  (ref, videoId) {
-    final supabaseService = ref.watch(supabaseServiceProvider);
-    return supabaseService.getComments(videoId);
-  },
-);
+final commentsStreamProvider = StreamProvider.family<List<Comments>, String>((
+  ref,
+  videoId,
+) {
+  final supabaseService = ref.watch(supabaseServiceProvider);
+  return supabaseService.getComments(videoId);
+});

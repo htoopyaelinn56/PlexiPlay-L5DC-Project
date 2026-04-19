@@ -6,6 +6,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:plexi_play/pages/upload_page.dart';
 import 'package:plexi_play/supabase/auth_controller.dart';
 import 'package:plexi_play/supabase/supabase_service.dart';
+import 'package:plexi_play/supabase/video_delete_controller.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../supabase/videos.dart';
 import '../theme/neo_theme.dart';
@@ -42,14 +43,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     ref.read(authControllerProvider.notifier).signOut();
   }
 
-  void _deletePost(int index) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Post deleted!'),
-        backgroundColor: Colors.redAccent,
-        duration: Duration(seconds: 2),
-      ),
-    );
+  void _deletePost(String id) {
+    ref.read(videoDeleteControllerProvider.notifier).deleteVideo(id);
   }
 
   void _editPost(Videos video) {
@@ -86,6 +81,38 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           (route) => false,
         );
       }
+    });
+
+    ref.listen(videoDeleteControllerProvider, (prev, next) {
+      next.whenOrNull(
+        error: (error, st) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error deleting video: $error'),
+              backgroundColor: Colors.redAccent,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        },
+        loading: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Deleting video...'),
+              backgroundColor: Colors.orangeAccent,
+              duration: Duration(milliseconds: 200),
+            ),
+          );
+        },
+        data: (_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Video deleted successfully!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 1),
+            ),
+          );
+        },
+      );
     });
     return Scaffold(
       backgroundColor: NeoTheme.white,
@@ -160,7 +187,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           return PostCard(
                             video: post,
                             isProfileView: true,
-                            onDelete: () => _deletePost(index),
+                            onDelete: () => _deletePost(post.id),
                             onEdit: () => _editPost(post),
                           );
                         }, childCount: videos.length),
