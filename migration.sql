@@ -32,3 +32,21 @@ create table if not exists public.videos (
   constraint videos_pkey primary key (id),
   constraint videos_created_by_fkey foreign KEY (created_by) references profiles (id) on update CASCADE on delete CASCADE
 ) TABLESPACE pg_default;
+
+-- Allow anyone (logged in or not) to UPLOAD to the 'images' and 'videos' buckets
+CREATE POLICY "Public Upload"
+ON storage.objects
+FOR INSERT
+TO anon, authenticated
+WITH CHECK (
+  bucket_id = 'images' OR bucket_id = 'videos'
+);
+
+-- Allow anyone to VIEW files in these buckets (Required to get the URL later)
+CREATE POLICY "Public View"
+ON storage.objects
+FOR SELECT
+                      TO anon, authenticated
+                      USING (
+                      bucket_id = 'images' OR bucket_id = 'videos'
+                      );
