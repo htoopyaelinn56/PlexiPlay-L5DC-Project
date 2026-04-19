@@ -12,17 +12,17 @@ import 'package:plexi_play/pages/feed_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'pages/login_page.dart';
 
+const supabaseUrl = 'https://buxwwrqglfqvdncxhgcp.supabase.co';
+const supabaseAnonKey =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1eHd3cnFnbGZxdmRuY3hoZ2NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1Mzc0MjMsImV4cCI6MjA5MjExMzQyM30.mQUlr1kuEukeNMndy_HYgwkUrlAB1R6-_CjkXog3gbM';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialze Supabase
   // url and anonKey should be gitignore,
   // but since this is for university project, I'm hardcoding them here for simplicity
-  Supabase.initialize(
-    url: 'https://buxwwrqglfqvdncxhgcp.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1eHd3cnFnbGZxdmRuY3hoZ2NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1Mzc0MjMsImV4cCI6MjA5MjExMzQyM30.mQUlr1kuEukeNMndy_HYgwkUrlAB1R6-_CjkXog3gbM',
-  );
+  Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
 
   // Initialize Flutter Downloader
   await FlutterDownloader.initialize(debug: true, ignoreSsl: true);

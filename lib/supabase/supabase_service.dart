@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plexi_play/exceptions/auth_exception.dart' as ae;
+import 'package:plexi_play/exceptions/video_upload_expection.dart';
 import 'package:plexi_play/supabase/videos.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
@@ -129,6 +130,29 @@ class SupabaseService {
     );
 
     return controller.stream;
+  }
+
+  Future<void> uploadVideo({
+    required String title,
+    required String thumbnailUrl,
+    required String videoUrl,
+  }) async {
+    final userId = supabaseClient.auth.currentUser?.id;
+    if (userId == null) {
+      throw ae.AuthException('User not authenticated');
+    }
+
+    try {
+      await supabaseClient.from('videos').insert({
+        'title': title,
+        'thumbnail_url': 'https://buxwwrqglfqvdncxhgcp.supabase.co/storage/v1/object/public/$thumbnailUrl',
+        'video_url': 'https://buxwwrqglfqvdncxhgcp.supabase.co/storage/v1/object/public/$videoUrl',
+        'created_by': userId,
+      });
+    } catch (e) {
+      log('Error uploading video: $e');
+      throw VideoUploadException('Failed to upload video. Please try again.');
+    }
   }
 }
 

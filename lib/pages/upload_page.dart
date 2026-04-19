@@ -1,8 +1,11 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:plexi_play/supabase/video_upload_controller.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:video_compress/video_compress.dart';
 import '../theme/neo_theme.dart';
@@ -10,14 +13,14 @@ import '../widgets/neo_button.dart';
 import '../widgets/neo_text_field.dart';
 import '../widgets/neo_back_button.dart';
 
-class UploadPage extends StatefulWidget {
+class UploadPage extends ConsumerStatefulWidget {
   const UploadPage({super.key});
 
   @override
-  State<UploadPage> createState() => _UploadPageState();
+  ConsumerState<UploadPage> createState() => _UploadPageState();
 }
 
-class _UploadPageState extends State<UploadPage> {
+class _UploadPageState extends ConsumerState<UploadPage> {
   final _descriptionController = TextEditingController();
   File? _selectedVideo;
   File? _selectedThumbnail;
@@ -66,8 +69,10 @@ class _UploadPageState extends State<UploadPage> {
   }
 
   Future<String> _uploadFileToSupabase(File file, String folder) async {
-    String url = '';
-    await Future.delayed(const Duration(seconds: 1)); // Simulate upload delay
+    final supabase = Supabase.instance.client;
+    final url = await supabase.storage
+        .from(folder)
+        .upload(file.path.split('/').last, file);
     return url;
   }
 
@@ -145,7 +150,7 @@ class _UploadPageState extends State<UploadPage> {
         });
         final uploadedThumbnailUrl = await _uploadFileToSupabase(
           _selectedThumbnail!,
-          'thumbnails',
+          'images',
         );
 
         setState(() {
@@ -156,11 +161,19 @@ class _UploadPageState extends State<UploadPage> {
           'videos',
         );
 
-        setState(() {
-          uploadStatus = 'Saving post...';
-        });
+        ref
+            .read(videoUploadControllerProvider.notifier)
+            .uploadVideo(
+              title: _descriptionController.text.trim(),
+              thumbnailUrl: uploadedThumbnailUrl,
+              videoUrl: uploadedVideoUrl,
+            );
       }
-    } catch (e) {
+    } catch (e, st) {
+      setState(() {
+        uploadStatus = null;
+      });
+      log('$e $st', name: 'UploadPage._uploadVideo');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -174,6 +187,36 @@ class _UploadPageState extends State<UploadPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(videoUploadControllerProvider, (prev, next) {
+      if (next.isLoading) {
+        setState(() {
+          uploadStatus = 'Uploading...';
+        });
+      } else if (next.hasError) {
+        setState(() {
+          uploadStatus = null;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.error.toString()),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else if (next.hasValue) {
+        if (mounted) {
+          setState(() {
+            uploadStatus = null;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Video uploaded successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context);
+        }
+      }
+    });
     return Scaffold(
       backgroundColor: NeoTheme.cream,
       appBar: AppBar(
