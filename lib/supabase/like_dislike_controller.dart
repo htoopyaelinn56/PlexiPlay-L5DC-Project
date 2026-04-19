@@ -7,7 +7,10 @@ class LikeDislikeController extends AsyncNotifier<void> {
   @override
   FutureOr<void> build() {}
 
-  void likeOrDislike({required String videoId, required bool like}) async {
+  Future<void> likeOrDislike({
+    required String videoId,
+    required bool like,
+  }) async {
     final supabaseService = ref.read(supabaseServiceProvider);
 
     try {

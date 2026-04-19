@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:plexi_play/local_db/downloaded_videos_repository.dart';
+import 'package:plexi_play/supabase/like_dislike_controller.dart';
 import '../supabase/videos.dart';
 import '../theme/neo_theme.dart';
 import '../pages/video_player_page.dart';
@@ -33,6 +34,8 @@ class PostCard extends ConsumerStatefulWidget {
 
 class _PostCardState extends ConsumerState<PostCard> {
   bool _isLiked = false;
+  int _likeCount = 0;
+  bool _isLikeUpdating = false;
 
   void _openVideo() {
     Navigator.of(context).push(
@@ -46,16 +49,64 @@ class _PostCardState extends ConsumerState<PostCard> {
     );
   }
 
-  void _toggleLike() {
+  Future<void> _toggleLike() async {
+    if (_isLikeUpdating) return;
+
+    final previousLiked = _isLiked;
+    final previousLikeCount = _likeCount;
+    final nextLiked = !previousLiked;
+    final nextLikeCount =
+        nextLiked ? previousLikeCount + 1 : (previousLikeCount - 1).clamp(0, 1 << 30);
+
     setState(() {
-      _isLiked = !_isLiked;
+      _isLiked = nextLiked;
+      _likeCount = nextLikeCount;
+      _isLikeUpdating = true;
     });
+
+    try {
+      await ref
+          .read(likeDislikeControllerProvider.notifier)
+          .likeOrDislike(videoId: widget.video.id, like: nextLiked);
+    } catch (e, st) {
+      log('Like/dislike failed: $e', stackTrace: st);
+      if (!mounted) return;
+      setState(() {
+        _isLiked = previousLiked;
+        _likeCount = previousLikeCount;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to update like. Please try again.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLikeUpdating = false;
+        });
+      }
+    }
   }
 
   @override
   void initState() {
     _isLiked = widget.video.likedByCurrentUser;
+    _likeCount = widget.video.likeCount;
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant PostCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.video.id != widget.video.id ||
+        oldWidget.video.likedByCurrentUser != widget.video.likedByCurrentUser ||
+        oldWidget.video.likeCount != widget.video.likeCount) {
+      _isLiked = widget.video.likedByCurrentUser;
+      _likeCount = widget.video.likeCount;
+      _isLikeUpdating = false;
+    }
   }
 
   void _openComments() {
@@ -327,7 +378,7 @@ class _PostCardState extends ConsumerState<PostCard> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              '${widget.video.likeCount > 0 ? '${widget.video.likeCount} ' : ''}LIKE${widget.video.likeCount <= 1 ? '' : 'S'}',
+                              '${_likeCount > 0 ? '$_likeCount ' : ''}LIKE${_likeCount <= 1 ? '' : 'S'}',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
