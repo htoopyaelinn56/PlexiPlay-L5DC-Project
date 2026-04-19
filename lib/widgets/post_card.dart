@@ -55,8 +55,9 @@ class _PostCardState extends ConsumerState<PostCard> {
     final previousLiked = _isLiked;
     final previousLikeCount = _likeCount;
     final nextLiked = !previousLiked;
-    final nextLikeCount =
-        nextLiked ? previousLikeCount + 1 : (previousLikeCount - 1).clamp(0, 1 << 30);
+    final nextLikeCount = nextLiked
+        ? previousLikeCount + 1
+        : (previousLikeCount - 1).clamp(0, 1 << 30);
 
     setState(() {
       _isLiked = nextLiked;
@@ -112,8 +113,7 @@ class _PostCardState extends ConsumerState<PostCard> {
   void _openComments() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) =>
-            CommentsPage(originalPostUsername: widget.video.username),
+        builder: (context) => CommentsPage(videoId: widget.video.id),
       ),
     );
   }

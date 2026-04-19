@@ -8,6 +8,8 @@ import 'package:plexi_play/supabase/auth_state_controller.dart';
 import 'package:plexi_play/supabase/videos.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
+import 'comments.dart';
+
 class SupabaseService {
   static final supabaseClient = sb.Supabase.instance.client;
 
@@ -227,13 +229,89 @@ class SupabaseService {
           .from('videos')
           .update({'like_count': likeCount})
           .eq('id', videoId);
-
     } catch (e) {
       log('Error liking/disliking video: $e');
       throw VideoUploadException(
         'Failed to ${like ? 'like' : 'dislike'} video. Please try again.',
       );
     }
+  }
+
+  Stream<List<Comments>> getComments(String videoId) {
+    final channelName =
+        'comments_video_${videoId}_${DateTime.now().millisecondsSinceEpoch}';
+
+    late StreamController<List<Comments>> controller;
+    sb.RealtimeChannel? channel;
+
+    Future<void> fetchComments() async {
+      try {
+        final response = await supabaseClient
+            .from('comments')
+            .select('*, profiles(username)')
+            .eq('video_id', videoId)
+            .order('created_at', ascending: true);
+
+        if (!controller.isClosed) {
+          controller.add(
+            (response as List<dynamic>).map((comment) {
+              return Comments(
+                id: comment['id'] as String,
+                userId: comment['user_id'] as String,
+                username:
+                    comment['profiles']['username'] as String? ?? 'Unknown',
+                videoId: comment['video_id'] as String,
+                comment: comment['comment'] as String,
+                createdAt: DateTime.parse(
+                  comment['created_at'] as String,
+                ).toLocal(),
+              );
+            }).toList(),
+          );
+        }
+      } catch (e) {
+        log('Error fetching comments: $e');
+        if (!controller.isClosed) {
+          controller.addError(e);
+        }
+      }
+    }
+
+    controller = StreamController<List<Comments>>(
+      onListen: () async {
+        await fetchComments();
+
+        channel = supabaseClient
+            .channel(channelName)
+            .onPostgresChanges(
+              event: sb.PostgresChangeEvent.all,
+              schema: 'public',
+              table: 'comments',
+              filter: sb.PostgresChangeFilter(
+                type: sb.PostgresChangeFilterType.eq,
+                column: 'video_id',
+                value: videoId,
+              ),
+              callback: (payload) {
+                log('💬 [$channelName] event: ${payload.eventType}');
+                fetchComments();
+              },
+            )
+            .subscribe((status, [error]) {
+              log('📶 [$channelName] status: $status');
+              if (error != null) log('❌ [$channelName] error: $error');
+            });
+      },
+      onCancel: () async {
+        log('🧹 Removing channel: $channelName');
+        if (channel != null) {
+          await supabaseClient.removeChannel(channel!);
+        }
+        await controller.close();
+      },
+    );
+
+    return controller.stream;
   }
 }
 
@@ -249,3 +327,10 @@ final videosStreamProvider = StreamProvider.family<List<Videos>, bool>((
   ); // Watch userId to trigger refresh when it changes
   return supabaseService.getVideos(forProfile);
 });
+
+final commentsStreamProvider = StreamProvider.family<List<Comments>, String>(
+  (ref, videoId) {
+    final supabaseService = ref.watch(supabaseServiceProvider);
+    return supabaseService.getComments(videoId);
+  },
+);

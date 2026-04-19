@@ -15,9 +15,9 @@ class Comment {
 }
 
 class CommentsPage extends StatefulWidget {
-  final String originalPostUsername;
+  final String videoId;
 
-  const CommentsPage({super.key, required this.originalPostUsername});
+  const CommentsPage({super.key, required this.videoId});
 
   @override
   State<CommentsPage> createState() => _CommentsPageState();
