@@ -90,6 +90,7 @@ class SupabaseService {
                 thumbnailUrl: video['thumbnail_url'] as String? ?? '',
                 videoUrl: video['video_url'] as String? ?? '',
                 likeCount: video['like_count'] as int? ?? 0,
+                likedByCurrentUser: false,
               );
             }).toList(),
           );

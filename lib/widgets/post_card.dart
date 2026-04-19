@@ -52,6 +52,12 @@ class _PostCardState extends ConsumerState<PostCard> {
     });
   }
 
+  @override
+  void initState() {
+    _isLiked = widget.video.likedByCurrentUser;
+    super.initState();
+  }
+
   void _openComments() {
     Navigator.of(context).push(
       MaterialPageRoute(

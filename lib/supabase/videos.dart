@@ -6,6 +6,7 @@ class Videos {
   final String thumbnailUrl;
   final String videoUrl;
   final int likeCount;
+  final bool likedByCurrentUser;
 
   Videos({
     required this.id,
@@ -15,5 +16,6 @@ class Videos {
     required this.thumbnailUrl,
     required this.videoUrl,
     required this.likeCount,
+    required this.likedByCurrentUser,
   });
 }
