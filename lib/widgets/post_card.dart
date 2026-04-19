@@ -8,28 +8,21 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:plexi_play/local_db/downloaded_videos_repository.dart';
+import '../supabase/videos.dart';
 import '../theme/neo_theme.dart';
 import '../pages/video_player_page.dart';
 import '../pages/comments_page.dart';
 
 class PostCard extends ConsumerStatefulWidget {
-  final String videoUrl;
-  final String thumbnailUrl;
-  final String username;
-  final String description;
+  final Videos video;
   final bool isProfileView;
-  final DateTime createdAt;
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
 
   const PostCard({
     super.key,
-    required this.videoUrl,
-    required this.thumbnailUrl,
-    required this.username,
-    required this.description,
+    required this.video,
     this.isProfileView = false,
-    required this.createdAt,
     this.onDelete,
     this.onEdit,
   });
@@ -45,9 +38,9 @@ class _PostCardState extends ConsumerState<PostCard> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => VideoPlayerPage(
-          videoUrl: widget.videoUrl,
-          username: widget.username,
-          description: widget.description,
+          videoUrl: widget.video.videoUrl,
+          username: widget.video.username,
+          description: widget.video.title,
         ),
       ),
     );
@@ -63,7 +56,7 @@ class _PostCardState extends ConsumerState<PostCard> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) =>
-            CommentsPage(originalPostUsername: widget.username),
+            CommentsPage(originalPostUsername: widget.video.username),
       ),
     );
   }
@@ -88,7 +81,7 @@ class _PostCardState extends ConsumerState<PostCard> {
 
       if (downloadsDir != null) {
         final savedDir = downloadsDir.path;
-        final fileName = widget.videoUrl.split('/').last.split('?').first;
+        final fileName = widget.video.videoUrl.split('/').last.split('?').first;
         final path = '$savedDir/$fileName';
 
         final downloadedVideoRepository = ref.read(
@@ -108,7 +101,7 @@ class _PostCardState extends ConsumerState<PostCard> {
           }
         } else {
           await FlutterDownloader.enqueue(
-            url: widget.videoUrl,
+            url: widget.video.videoUrl,
             savedDir: savedDir,
             fileName: fileName,
             saveInPublicStorage: false,
@@ -117,10 +110,10 @@ class _PostCardState extends ConsumerState<PostCard> {
           );
           await downloadedVideoRepository.saveOfflineVideos(
             filePath: path,
-            title: widget.description,
-            thumbnailUrl: widget.thumbnailUrl,
-            videoUrl: widget.videoUrl,
-            author: widget.username,
+            title: widget.video.title,
+            thumbnailUrl: widget.video.thumbnailUrl,
+            videoUrl: widget.video.videoUrl,
+            author: widget.video.username,
           );
         }
       }
@@ -169,7 +162,7 @@ class _PostCardState extends ConsumerState<PostCard> {
                   ),
                   child: Center(
                     child: Text(
-                      widget.username.substring(0, 1).toUpperCase(),
+                      widget.video.username.substring(0, 1).toUpperCase(),
                       style: const TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: 18,
@@ -183,13 +176,13 @@ class _PostCardState extends ConsumerState<PostCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.username,
+                        widget.video.username,
                         style: const TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 16,
                         ),
                       ),
-                      Text(DateFormat('MMM d, yyyy').format(widget.createdAt)),
+                      Text(DateFormat('MMM d, yyyy').format(widget.video.createdAt)),
                     ],
                   ),
                 ),
@@ -253,7 +246,7 @@ class _PostCardState extends ConsumerState<PostCard> {
                 alignment: Alignment.center,
                 children: [
                   Image.network(
-                    widget.thumbnailUrl,
+                    widget.video.thumbnailUrl,
                     fit: BoxFit.cover,
                     width: double.infinity,
                     errorBuilder: (context, error, stackTrace) {
@@ -412,7 +405,7 @@ class _PostCardState extends ConsumerState<PostCard> {
 
                 // Description
                 Text(
-                  widget.description,
+                  widget.video.title,
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,

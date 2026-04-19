@@ -5,6 +5,7 @@ class Videos {
   final String title;
   final String thumbnailUrl;
   final String videoUrl;
+  final int likeCount;
 
   Videos({
     required this.id,
@@ -13,5 +14,6 @@ class Videos {
     required this.title,
     required this.thumbnailUrl,
     required this.videoUrl,
+    required this.likeCount,
   });
 }

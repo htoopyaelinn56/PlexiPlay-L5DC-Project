@@ -128,15 +128,7 @@ class _FeedPageState extends ConsumerState<FeedPage> {
                     SliverList(
                       delegate: SliverChildBuilderDelegate((context, index) {
                         final video = videos[index];
-                        return PostCard(
-                          videoUrl: video.videoUrl,
-                          thumbnailUrl: video.thumbnailUrl,
-                          username: video.username,
-                          createdAt: video.createdAt,
-                          description: video.title.isNotEmpty
-                              ? video.title
-                              : 'No description',
-                        );
+                        return PostCard(video: video);
                       }, childCount: videos.length),
                     ),
                     const SliverToBoxAdapter(
