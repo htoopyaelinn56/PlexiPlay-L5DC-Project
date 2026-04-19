@@ -157,6 +157,24 @@ class SupabaseService {
       throw VideoUploadException('Failed to upload video. Please try again.');
     }
   }
+
+  Future<void> editVideo({required String id, required String title}) async {
+    final userId = supabaseClient.auth.currentUser?.id;
+    if (userId == null) {
+      throw ae.AuthException('User not authenticated');
+    }
+
+    try {
+      await supabaseClient
+          .from('videos')
+          .update({'title': title})
+          .eq('id', id)
+          .eq('created_by', userId);
+    } catch (e) {
+      log('Error editing video: $e');
+      throw VideoUploadException('Failed to edit video. Please try again.');
+    }
+  }
 }
 
 final supabaseServiceProvider = Provider((ref) => SupabaseService());

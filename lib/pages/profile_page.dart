@@ -3,9 +3,11 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:plexi_play/pages/upload_page.dart';
 import 'package:plexi_play/supabase/auth_controller.dart';
 import 'package:plexi_play/supabase/supabase_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../supabase/videos.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/post_card.dart';
 import '../widgets/neo_back_button.dart';
@@ -50,8 +52,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  void _editPost(int index) {
+  void _editPost(Videos video) {
     // navigate to upload page
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => UploadPage(video: video)),
+    );
   }
 
   @override
@@ -146,7 +152,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                               : 'No description',
                           isProfileView: true,
                           onDelete: () => _deletePost(index),
-                          onEdit: () => _editPost(index),
+                          onEdit: () => _editPost(post),
                         );
                       }, childCount: videos.length),
                     ),

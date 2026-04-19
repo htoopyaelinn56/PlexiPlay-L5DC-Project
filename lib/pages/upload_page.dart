@@ -8,13 +8,17 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:plexi_play/supabase/video_upload_controller.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:video_compress/video_compress.dart';
+import '../supabase/videos.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/neo_button.dart';
 import '../widgets/neo_text_field.dart';
 import '../widgets/neo_back_button.dart';
 
 class UploadPage extends ConsumerStatefulWidget {
-  const UploadPage({super.key});
+  const UploadPage({super.key, this.video});
+
+  // for editing, but just title
+  final Videos? video;
 
   @override
   ConsumerState<UploadPage> createState() => _UploadPageState();
@@ -30,6 +34,9 @@ class _UploadPageState extends ConsumerState<UploadPage> {
   void initState() {
     super.initState();
     _requestMediaPermissions();
+    if (widget.video != null) {
+      _descriptionController.text = widget.video!.title;
+    }
   }
 
   Future<void> _requestMediaPermissions() async {
@@ -44,6 +51,15 @@ class _UploadPageState extends ConsumerState<UploadPage> {
   }
 
   Future<void> _pickVideo() async {
+    if (widget.video != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot edit the video. Please only edit the caption.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
     final picker = ImagePicker();
     final XFile? video = await picker.pickVideo(source: ImageSource.gallery);
 
@@ -77,6 +93,15 @@ class _UploadPageState extends ConsumerState<UploadPage> {
   }
 
   Future<void> _pickThumbnail() async {
+    if (widget.video != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot edit the image. Please only edit the caption.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
     final picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
@@ -185,12 +210,30 @@ class _UploadPageState extends ConsumerState<UploadPage> {
     }
   }
 
+  Future<void> _editVideo() async {
+    if (_descriptionController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please provide a caption.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    ref.read(videoUploadControllerProvider.notifier).editVideo(
+      id: widget.video!.id,
+      title: _descriptionController.text.trim(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isEdit = widget.video != null;
     ref.listen(videoUploadControllerProvider, (prev, next) {
       if (next.isLoading) {
         setState(() {
-          uploadStatus = 'Uploading...';
+          uploadStatus = isEdit ? 'Editing...' : 'Uploading...';
         });
       } else if (next.hasError) {
         setState(() {
@@ -208,8 +251,10 @@ class _UploadPageState extends ConsumerState<UploadPage> {
             uploadStatus = null;
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Video uploaded successfully!'),
+            SnackBar(
+              content: Text(
+                'Video ${isEdit ? 'edited' : 'uploaded'} successfully!',
+              ),
               backgroundColor: Colors.green,
             ),
           );
@@ -244,8 +289,8 @@ class _UploadPageState extends ConsumerState<UploadPage> {
         leadingWidth: 64,
         backgroundColor: NeoTheme.white,
         centerTitle: false,
-        title: const Text(
-          'NEW POST',
+        title: Text(
+          isEdit ? 'EDIT POST' : 'NEW POST',
           style: TextStyle(
             color: NeoTheme.black,
             fontSize: 22,
@@ -273,7 +318,7 @@ class _UploadPageState extends ConsumerState<UploadPage> {
                         height: 140,
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         decoration: BoxDecoration(
-                          color: _selectedVideo != null
+                          color: _selectedVideo != null || isEdit
                               ? NeoTheme.blue
                               : NeoTheme.white,
                           border: Border.all(
@@ -300,7 +345,7 @@ class _UploadPageState extends ConsumerState<UploadPage> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                _selectedVideo != null
+                                _selectedVideo != null || isEdit
                                     ? 'Video Ready'
                                     : 'PICK VIDEO',
                                 textAlign: TextAlign.center,
@@ -325,7 +370,7 @@ class _UploadPageState extends ConsumerState<UploadPage> {
                         height: 140,
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         decoration: BoxDecoration(
-                          color: _selectedThumbnail != null
+                          color: _selectedThumbnail != null || isEdit
                               ? NeoTheme.yellow
                               : NeoTheme.white,
                           border: Border.all(
@@ -352,7 +397,7 @@ class _UploadPageState extends ConsumerState<UploadPage> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                _selectedThumbnail != null
+                                _selectedThumbnail != null || isEdit
                                     ? 'Thumb Ready'
                                     : 'PICK THUMBNAIL',
                                 textAlign: TextAlign.center,
@@ -379,9 +424,9 @@ class _UploadPageState extends ConsumerState<UploadPage> {
               ),
               const SizedBox(height: 48),
               NeoButton(
-                text: uploadStatus ?? 'UPLOAD',
+                text: uploadStatus ?? (isEdit ? 'EDIT' : 'UPLOAD'),
                 backgroundColor: NeoTheme.pink,
-                onPressed: _uploadVideo,
+                onPressed: isEdit ? _editVideo : _uploadVideo,
               ),
             ],
           ),
