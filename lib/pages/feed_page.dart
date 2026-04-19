@@ -118,6 +118,7 @@ class _FeedPageState extends ConsumerState<FeedPage> {
                         videoUrl: video.videoUrl,
                         thumbnailUrl: video.thumbnailUrl,
                         username: video.username,
+                        createdAt: video.createdAt,
                         description: video.title.isNotEmpty
                             ? video.title
                             : 'No description',

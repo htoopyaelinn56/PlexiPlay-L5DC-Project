@@ -146,6 +146,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         return PostCard(
                           videoUrl: post.videoUrl,
                           username: post.username,
+                          createdAt: post.createdAt,
                           thumbnailUrl: post.thumbnailUrl,
                           description: post.title.isNotEmpty
                               ? post.title

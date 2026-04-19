@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
@@ -17,6 +18,7 @@ class PostCard extends ConsumerStatefulWidget {
   final String username;
   final String description;
   final bool isProfileView;
+  final DateTime createdAt;
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
 
@@ -27,6 +29,7 @@ class PostCard extends ConsumerStatefulWidget {
     required this.username,
     required this.description,
     this.isProfileView = false,
+    required this.createdAt,
     this.onDelete,
     this.onEdit,
   });
@@ -176,12 +179,18 @@ class _PostCardState extends ConsumerState<PostCard> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    widget.username,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.username,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(DateFormat('MMM d, yyyy').format(widget.createdAt)),
+                    ],
                   ),
                 ),
                 if (widget.isProfileView)
