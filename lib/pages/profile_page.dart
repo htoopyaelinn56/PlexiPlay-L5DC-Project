@@ -36,30 +36,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     super.initState();
   }
 
-  // Dummy profile posts
-  final List<Map<String, String>> _myPosts = [
-    {
-      'videoUrl':
-          'https://wbeifzoolcvpmsmgnskm.supabase.co/storage/v1/object/public/videos/2026-04-14-16-13-22-622.mp4',
-      'username': 'MyUsername',
-      'description': 'This is my first test video on PlexiPlay! 🚀',
-    },
-    {
-      'videoUrl':
-          'https://wbeifzoolcvpmsmgnskm.supabase.co/storage/v1/object/public/videos/2026-04-14-16-13-22-622.mp4',
-      'username': 'MyUsername',
-      'description': 'Exploring Neo-brutalism vibes with this awesome player.',
-    },
-  ];
-
   void _handleLogout() {
     ref.read(authControllerProvider.notifier).signOut();
   }
 
   void _deletePost(int index) {
-    setState(() {
-      _myPosts.removeAt(index);
-    });
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Post deleted!'),

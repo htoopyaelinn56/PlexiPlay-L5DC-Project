@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plexi_play/exceptions/auth_exception.dart' as ae;
 import 'package:plexi_play/exceptions/video_upload_expection.dart';
+import 'package:plexi_play/supabase/auth_state_controller.dart';
 import 'package:plexi_play/supabase/videos.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
@@ -145,8 +146,10 @@ class SupabaseService {
     try {
       await supabaseClient.from('videos').insert({
         'title': title,
-        'thumbnail_url': 'https://buxwwrqglfqvdncxhgcp.supabase.co/storage/v1/object/public/$thumbnailUrl',
-        'video_url': 'https://buxwwrqglfqvdncxhgcp.supabase.co/storage/v1/object/public/$videoUrl',
+        'thumbnail_url':
+            'https://buxwwrqglfqvdncxhgcp.supabase.co/storage/v1/object/public/$thumbnailUrl',
+        'video_url':
+            'https://buxwwrqglfqvdncxhgcp.supabase.co/storage/v1/object/public/$videoUrl',
         'created_by': userId,
       });
     } catch (e) {
@@ -160,10 +163,16 @@ final supabaseServiceProvider = Provider((ref) => SupabaseService());
 
 final videosStreamProvider = StreamProvider<List<Videos>>((ref) {
   final supabaseService = ref.watch(supabaseServiceProvider);
+  ref.watch(
+    authStateControllerProvider,
+  ); // Watch userId to trigger refresh when it changes
   return supabaseService.getVideos(false);
 });
 
 final profileVideosStreamProvider = StreamProvider<List<Videos>>((ref) {
   final supabaseService = ref.watch(supabaseServiceProvider);
+  ref.watch(
+    authStateControllerProvider,
+  ); // Watch userId to trigger refresh when it changes
   return supabaseService.getVideos(true);
 });

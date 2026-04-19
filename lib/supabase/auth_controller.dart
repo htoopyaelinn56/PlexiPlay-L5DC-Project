@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plexi_play/exceptions/auth_exception.dart';
+import 'package:plexi_play/supabase/auth_state_controller.dart';
 import 'package:plexi_play/supabase/supabase_service.dart';
 
 class AuthController extends AsyncNotifier<void> {
@@ -28,6 +29,10 @@ class AuthController extends AsyncNotifier<void> {
         );
       }
 
+      ref
+          .read(authStateControllerProvider.notifier)
+          .updateUserId(SupabaseService.supabaseClient.auth.currentUser?.id);
+
       state = const AsyncData(null);
     } catch (e, st) {
       log('Error during sign up: $e, ${e.runtimeType}');
@@ -44,6 +49,7 @@ class AuthController extends AsyncNotifier<void> {
     try {
       final supabaseService = ref.read(supabaseServiceProvider);
       await supabaseService.signOut();
+      ref.read(authStateControllerProvider.notifier).updateUserId(null);
       state = const AsyncData(null);
     } catch (e, st) {
       log('Error during sign out: $e, ${e.runtimeType}');
