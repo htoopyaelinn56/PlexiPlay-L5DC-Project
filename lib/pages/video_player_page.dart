@@ -53,6 +53,9 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
             _controller.play(); // Auto-play when opened
             _isPlaying = true;
           });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(notesStreamProvider);
+    });
   }
 
   @override
