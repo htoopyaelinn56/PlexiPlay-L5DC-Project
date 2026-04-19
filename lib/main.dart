@@ -19,9 +19,9 @@ void main() async {
   // url and anonKey should be gitignore,
   // but since this is for university project, I'm hardcoding them here for simplicity
   Supabase.initialize(
-    url: 'https://wbeifzoolcvpmsmgnskm.supabase.co',
+    url: 'https://buxwwrqglfqvdncxhgcp.supabase.co',
     anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiZWlmem9vbGN2cG1zbWduc2ttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMjY3MTIsImV4cCI6MjA5MTYwMjcxMn0.A84VAYM-yrD9ZjrRmusX3rPnA5cpNwtmald7DdlwLrE',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1eHd3cnFnbGZxdmRuY3hoZ2NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1Mzc0MjMsImV4cCI6MjA5MjExMzQyM30.mQUlr1kuEukeNMndy_HYgwkUrlAB1R6-_CjkXog3gbM',
   );
 
   // Initialize Flutter Downloader
