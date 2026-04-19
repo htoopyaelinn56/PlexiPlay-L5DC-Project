@@ -69,7 +69,7 @@ class SupabaseService {
       try {
         var query = supabaseClient
             .from('videos')
-            .select('*, profiles(username)');
+            .select('*, profiles(username), videos_likes(liked_by)');
 
         if (forProfile && userId != null) {
           query = query.eq('created_by', userId);
@@ -80,6 +80,12 @@ class SupabaseService {
         if (!controller.isClosed) {
           controller.add(
             (response as List<dynamic>).map((video) {
+              final likes =
+                  (video['videos_likes'] as List<dynamic>?) ?? const [];
+              final likedByCurrentUser =
+                  userId != null &&
+                  likes.any((like) => like['liked_by'] == userId);
+
               return Videos(
                 id: video['id'] as String,
                 username: video['profiles']['username'] as String? ?? 'Unknown',
@@ -90,7 +96,7 @@ class SupabaseService {
                 thumbnailUrl: video['thumbnail_url'] as String? ?? '',
                 videoUrl: video['video_url'] as String? ?? '',
                 likeCount: video['like_count'] as int? ?? 0,
-                likedByCurrentUser: false,
+                likedByCurrentUser: likedByCurrentUser,
               );
             }).toList(),
           );
@@ -115,6 +121,15 @@ class SupabaseService {
               table: 'videos',
               callback: (payload) {
                 log('🔥 [$channelName] event: ${payload.eventType}');
+                fetchVideos();
+              },
+            )
+            .onPostgresChanges(
+              event: sb.PostgresChangeEvent.all,
+              schema: 'public',
+              table: 'videos_likes',
+              callback: (payload) {
+                log('❤️ [$channelName] likes event: ${payload.eventType}');
                 fetchVideos();
               },
             )
