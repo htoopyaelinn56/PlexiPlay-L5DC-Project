@@ -146,10 +146,8 @@ class SupabaseService {
     try {
       await supabaseClient.from('videos').insert({
         'title': title,
-        'thumbnail_url':
-            'https://buxwwrqglfqvdncxhgcp.supabase.co/storage/v1/object/public/$thumbnailUrl',
-        'video_url':
-            'https://buxwwrqglfqvdncxhgcp.supabase.co/storage/v1/object/public/$videoUrl',
+        'thumbnail_url': thumbnailUrl,
+        'video_url': videoUrl,
         'created_by': userId,
       });
     } catch (e) {

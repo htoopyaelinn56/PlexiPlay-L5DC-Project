@@ -22,6 +22,7 @@ dependencies:
   hugeicons: ^1.1.6
   supabase_flutter: ^2.12.4
   intl:
+  dio:
 
 dev_dependencies:
   flutter_test:

@@ -1,13 +1,15 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:plexi_play/main.dart';
 import 'package:plexi_play/supabase/video_upload_controller.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:video_compress/video_compress.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide MultipartFile;
+import '../main.dart';
 import '../supabase/videos.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/neo_button.dart';
@@ -86,10 +88,48 @@ class _UploadPageState extends ConsumerState<UploadPage> {
 
   Future<String> _uploadFileToSupabase(File file, String folder) async {
     final supabase = Supabase.instance.client;
-    final url = await supabase.storage
-        .from(folder)
-        .upload(file.path.split('/').last, file);
-    return url;
+    final fileName = file.path.split('/').last;
+
+    final storageUrl = '$supabaseUrl/storage/v1/object/$folder/$fileName';
+    final accessToken = supabase.auth.currentSession?.accessToken ?? '';
+    final anonKey = supabaseAnonKey;
+
+    final dio = Dio();
+
+    final response = await dio.post(
+      storageUrl,
+      data: FormData.fromMap({
+        'file': await MultipartFile.fromFile(file.path, filename: fileName),
+      }),
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'apikey': anonKey,
+          'x-upsert': 'true',
+        },
+      ),
+      onSendProgress: (sent, total) {
+        if (total > 0) {
+          if (folder == 'videos') {
+            setState(() {
+              uploadStatus =
+                  'Uploading video... ${(sent / total * 100).toStringAsFixed(0)}%';
+            });
+          } else {
+            setState(() {
+              uploadStatus =
+                  'Uploading thumbnail... ${(sent / total * 100).toStringAsFixed(0)}%';
+            });
+          }
+        }
+      },
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return '$supabaseUrl/storage/v1/object/public/$folder/$fileName';
+    } else {
+      throw Exception('Upload failed: ${response.statusCode}');
+    }
   }
 
   Future<void> _pickThumbnail() async {
@@ -159,41 +199,28 @@ class _UploadPageState extends ConsumerState<UploadPage> {
 
     try {
       setState(() {
-        uploadStatus = 'Compressing video...';
+        uploadStatus = 'Uploading thumbnail...';
       });
-      // This solves the full-download buffering issue from Supabase!
-      final MediaInfo? compressedVideo = await VideoCompress.compressVideo(
-        _selectedVideo!.path,
-        quality: VideoQuality.DefaultQuality,
-        deleteOrigin: false,
-        includeAudio: true,
+      final uploadedThumbnailUrl = await _uploadFileToSupabase(
+        _selectedThumbnail!,
+        'images',
       );
 
-      if (compressedVideo != null && compressedVideo.file != null) {
-        setState(() {
-          uploadStatus = 'Uploading thumbnail...';
-        });
-        final uploadedThumbnailUrl = await _uploadFileToSupabase(
-          _selectedThumbnail!,
-          'images',
-        );
+      setState(() {
+        uploadStatus = 'Uploading video...';
+      });
+      final uploadedVideoUrl = await _uploadFileToSupabase(
+        _selectedVideo!,
+        'videos',
+      );
 
-        setState(() {
-          uploadStatus = 'Uploading video...';
-        });
-        final uploadedVideoUrl = await _uploadFileToSupabase(
-          File(compressedVideo.file!.path),
-          'videos',
-        );
-
-        ref
-            .read(videoUploadControllerProvider.notifier)
-            .uploadVideo(
-              title: _descriptionController.text.trim(),
-              thumbnailUrl: uploadedThumbnailUrl,
-              videoUrl: uploadedVideoUrl,
-            );
-      }
+      ref
+          .read(videoUploadControllerProvider.notifier)
+          .uploadVideo(
+            title: _descriptionController.text.trim(),
+            thumbnailUrl: uploadedThumbnailUrl,
+            videoUrl: uploadedVideoUrl,
+          );
     } catch (e, st) {
       log('$e $st', name: 'UploadPage._uploadVideo');
       if (mounted) {
@@ -221,10 +248,12 @@ class _UploadPageState extends ConsumerState<UploadPage> {
       return;
     }
 
-    ref.read(videoUploadControllerProvider.notifier).editVideo(
-      id: widget.video!.id,
-      title: _descriptionController.text.trim(),
-    );
+    ref
+        .read(videoUploadControllerProvider.notifier)
+        .editVideo(
+          id: widget.video!.id,
+          title: _descriptionController.text.trim(),
+        );
   }
 
   @override
