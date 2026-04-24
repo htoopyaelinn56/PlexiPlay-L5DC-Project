@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:plexi_play/supabase/note_create_controller.dart';
+import 'package:plexi_play/supabase/note_controller.dart';
 import 'package:video_player/video_player.dart';
 import '../supabase/supabase_service.dart';
 import '../theme/neo_theme.dart';
