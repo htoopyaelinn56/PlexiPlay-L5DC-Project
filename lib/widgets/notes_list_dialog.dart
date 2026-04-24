@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../supabase/supabase_service.dart';
 import '../theme/neo_theme.dart';
+import 'edit_note_dialog.dart';
 
 class NotesListDialog extends ConsumerWidget {
   final VoidCallback onClose;
@@ -96,24 +98,54 @@ class NotesListDialog extends ConsumerWidget {
                             ),
                           ],
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
                           children: [
-                            Text(
-                              '@ ${note.timestamp}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 14,
-                                color: NeoTheme.pink,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '@ ${note.timestamp}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 14,
+                                      color: NeoTheme.pink,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    note.note,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      color: NeoTheme.black,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              note.note,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                color: NeoTheme.black,
+                            IconButton(
+                              onPressed: () async {
+                                Navigator.pop(context);
+                                await showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) {
+                                    return EditNoteDialog(
+                                      noteId: int.parse(note.id),
+                                      videoId: videoId,
+                                      timestamp: note.timestamp,
+                                      initialNote: note.note,
+                                      onClose: () {
+                                        Navigator.pop(context);
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                              icon: HugeIcon(
+                                icon: HugeIcons.strokeRoundedPropertyEdit,
+                                strokeWidth: 2,
                               ),
                             ),
                           ],
@@ -148,4 +180,3 @@ class NotesListDialog extends ConsumerWidget {
     );
   }
 }
-
