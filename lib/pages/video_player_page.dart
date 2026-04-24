@@ -136,7 +136,7 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
             _controller.play();
             setState(() => _isPlaying = true);
             ref
-                .read(noteCreateControllerProvider.notifier)
+                .read(noteControllerProvider.notifier)
                 .createNote(
                   videoId: widget.videoId,
                   note: note,
@@ -150,7 +150,7 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(noteCreateControllerProvider, (prev, next) {
+    ref.listen(noteControllerProvider, (prev, next) {
       next.whenOrNull(
         error: (e, st) {
           ScaffoldMessenger.of(context).showSnackBar(

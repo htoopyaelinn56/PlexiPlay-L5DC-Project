@@ -480,6 +480,42 @@ class SupabaseService {
       throw VideoUploadException('Failed to add note. Please try again.');
     }
   }
+
+  Future<void> editNote({required int noteId, required String note}) async {
+    final userId = supabaseClient.auth.currentUser?.id;
+    if (userId == null) {
+      throw ae.AuthException('User not authenticated');
+    }
+
+    try {
+      await supabaseClient
+          .from('notes')
+          .update({'note': note})
+          .eq('id', noteId)
+          .eq('created_by', userId);
+    } catch (e) {
+      log('Error editing note: $e');
+      throw VideoUploadException('Failed to edit note. Please try again.');
+    }
+  }
+
+  Future<void> deleteNote({required int noteId}) async {
+    final userId = supabaseClient.auth.currentUser?.id;
+    if (userId == null) {
+      throw ae.AuthException('User not authenticated');
+    }
+
+    try {
+      await supabaseClient
+          .from('notes')
+          .delete()
+          .eq('id', noteId)
+          .eq('created_by', userId);
+    } catch (e) {
+      log('Error deleting note: $e');
+      throw VideoUploadException('Failed to delete note. Please try again.');
+    }
+  }
 }
 
 final supabaseServiceProvider = Provider((ref) => SupabaseService());
