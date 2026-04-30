@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme/neo_theme.dart';
 import '../widgets/post_card.dart';
 import '../supabase/supabase_service.dart';
+import 'about_page.dart';
 import 'upload_page.dart';
 import 'profile_page.dart';
 import 'downloaded_videos_page.dart';
@@ -27,32 +28,44 @@ class _FeedPageState extends ConsumerState<FeedPage> {
         backgroundColor: NeoTheme.white,
         elevation: 0,
         centerTitle: false,
-        title: Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                border: Border.all(color: NeoTheme.black, width: 3),
-                borderRadius: BorderRadius.circular(8),
+        title: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return const AboutPage();
+                },
               ),
-              child: const Icon(
-                Icons.play_arrow_rounded,
-                color: NeoTheme.black,
-                size: 20,
+            );
+          },
+          child: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  border: Border.all(color: NeoTheme.black, width: 3),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.play_arrow_rounded,
+                  color: NeoTheme.black,
+                  size: 20,
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            const Text(
-              'PlexiPlay',
-              style: TextStyle(
-                color: NeoTheme.black,
-                fontSize: 24,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -1,
+              const SizedBox(width: 8),
+              const Text(
+                'PlexiPlay',
+                style: TextStyle(
+                  color: NeoTheme.black,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -1,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         actions: [
           IconButton(
